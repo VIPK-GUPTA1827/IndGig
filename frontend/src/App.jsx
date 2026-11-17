@@ -29,7 +29,7 @@ const Maintenance = lazy(() => import('./pages/Maintenance'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Switch to true to enable Maintenance mode across the app
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const PageLoader = () => (
   <div className="min-h-[60vh] flex flex-col items-center justify-center p-8">
