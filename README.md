@@ -45,7 +45,7 @@
 
 - **Frontend Application**: [https://gig-ora.vercel.app](https://gig-ora.vercel.app)
 - **Backend API**: [https://gigora-backend.onrender.com](https://gigora-backend.onrender.com)
-- **Repository**: [https://github.com/VIPK-GUPTA1827/GigOra](https://github.com/VIPK-GUPTA1827/GigOra)
+- **Repository**: [https://github.com/VIPK-GUPTA1827/IndGig](https://github.com/VIPK-GUPTA1827/IndGig)
 
 ---
 
@@ -58,8 +58,8 @@
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/VIPK-GUPTA1827/GigOra.git
-cd GigOra
+git clone https://github.com/VIPK-GUPTA1827/IndGig.git
+cd IndGig
 ```
 
 ### 2. Backend Setup
