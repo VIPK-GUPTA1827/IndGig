@@ -154,7 +154,7 @@ export default function PublicProfile() {
       <Seo 
         title={`${profileData.name || profileData.username || 'Tech Talent'} — IndGig Profile`}
         description={profileData.bio ? profileData.bio.slice(0, 150) : `View ${profileData.name || 'tech talent'}'s portfolio, verified skills, and project history on IndGig.`}
-        canonical={`https://indgig.vercel.app/profile/${username}`}
+        canonical={`https://indgig.vercel.app/profile/${profileData.username || profileData._id || id || 'me'}`}
       />
       {/* Top Navbar */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
