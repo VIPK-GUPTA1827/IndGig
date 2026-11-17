@@ -1,7 +1,7 @@
 # ⚡ IndGig (IG) — Milestone Freelance Marketplace for India
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-gig--ora.vercel.app-7c3aed?style=for-the-badge&logo=vercel)](https://gig-ora.vercel.app)
-[![Backend API](https://img.shields.io/badge/Backend%20Status-Live%20on%20Render-46E3B7?style=for-the-badge&logo=render)](https://gigora-backend.onrender.com)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-indgig.vercel.app-7c3aed?style=for-the-badge&logo=vercel)](https://indgig.vercel.app)
+[![Backend API](https://img.shields.io/badge/Backend%20Status-Live%20on%20Render-46E3B7?style=for-the-badge&logo=render)](https://indgig-backend.onrender.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](./LICENSE)
 
 > A modern, full-stack MERN freelance platform prototype featuring demo milestone payment flows, real-time messaging via Socket.io, Google OAuth 2.0 authentication, and developer portfolio showcases.
@@ -44,7 +44,7 @@
 ## 🚀 Live Deployments
 
 - **Frontend Application**: [https://indgig.vercel.app](https://indgig.vercel.app)
-- **Backend API**: [https://gigora-backend.onrender.com](https://gigora-backend.onrender.com)
+- **Backend API**: [https://indgig-backend.onrender.com](https://indgig-backend.onrender.com)
 - **Repository**: [https://github.com/VIPK-GUPTA1827/IndGig](https://github.com/VIPK-GUPTA1827/IndGig)
 
 ---
