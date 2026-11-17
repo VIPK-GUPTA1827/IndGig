@@ -20,10 +20,7 @@ export default function NotFound() {
       <header className="py-5 px-6 border-b border-[#DDE5ED] bg-white">
         <div className="max-w-[1240px] mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-xl bg-[#2F6FAB] text-white font-black text-sm flex items-center justify-center">
-              G
-            </div>
-            <span className="font-bold text-lg text-[#243040]">IndGig</span>
+            <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
           </Link>
           <Link
             to="/marketplace"

@@ -122,8 +122,7 @@ export default function Marketplace() {
           <span>{backLabel}</span>
         </Link>
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-[#030B3D] text-white flex items-center justify-center font-bold text-xs">G</div>
-          <span className="font-display font-black text-lg text-[#030B3D]">IndGig</span>
+          <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
         </div>
       </header>
 

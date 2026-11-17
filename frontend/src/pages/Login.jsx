@@ -97,10 +97,7 @@ export default function Login() {
       {/* Top Navigation Bar */}
       <header className="w-full max-w-[440px] mx-auto flex items-center justify-between relative z-10">
         <Link to="/" className="inline-flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-[#030B3D] text-white flex items-center justify-center font-black text-base shadow-md group-hover:scale-105 transition-transform">
-            G
-          </div>
-          <span className="text-xl font-black tracking-tight text-[#030B3D]">IndGig</span>
+          <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
         </Link>
 
         <Link 

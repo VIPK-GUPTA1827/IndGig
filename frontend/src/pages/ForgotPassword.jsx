@@ -64,10 +64,7 @@ export default function ForgotPassword() {
       {/* Top Bar */}
       <header className="max-w-[540px] w-full mx-auto flex items-center justify-between py-4 relative z-10">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#030B3D] text-white flex items-center justify-center font-black text-sm">
-            G
-          </div>
-          <span className="text-xl font-bold tracking-tight text-[#030B3D]">IndGig</span>
+          <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
         </Link>
 
         <Link 

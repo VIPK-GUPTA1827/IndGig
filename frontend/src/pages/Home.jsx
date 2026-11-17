@@ -83,10 +83,7 @@ export default function Home() {
             
             {/* Brand Logo */}
             <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#2F6FAB] text-white font-black text-base sm:text-lg shadow-xs group-hover:bg-[#255889] transition-colors">
-                G
-              </div>
-              <span className="text-lg sm:text-xl font-display font-black text-[#243040] tracking-tight">IndGig</span>
+              <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
             </Link>
 
             {/* Desktop Navigation Links */}

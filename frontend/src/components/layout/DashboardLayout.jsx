@@ -85,8 +85,7 @@ export default function DashboardLayout({
       {/* Desktop sidebar (navy). Hidden on mobile. */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col bg-navy text-white p-4 z-40">
         <Link to="/" className="flex items-center gap-2 px-2 py-2 min-h-11">
-          <span className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-bold text-sm">G</span>
-          <span className="font-semibold tracking-tight">IndGig</span>
+          <img src="/indgig_logo.png" alt="IndGig" className="h-7 w-auto object-contain brightness-0 invert" />
         </Link>
         <p className="px-2 mt-1 mb-4 text-xs text-slate-400">{roleLabel}</p>
         <nav aria-label="Main" className="flex flex-col gap-1">
