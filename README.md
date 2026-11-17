@@ -43,7 +43,7 @@
 
 ## 🚀 Live Deployments
 
-- **Frontend Application**: [https://gig-ora.vercel.app](https://gig-ora.vercel.app)
+- **Frontend Application**: [https://indgig.vercel.app](https://indgig.vercel.app)
 - **Backend API**: [https://gigora-backend.onrender.com](https://gigora-backend.onrender.com)
 - **Repository**: [https://github.com/VIPK-GUPTA1827/IndGig](https://github.com/VIPK-GUPTA1827/IndGig)
 
