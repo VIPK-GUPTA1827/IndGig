@@ -1,16 +1,16 @@
-# GigOra
+# IndGig
 
 > Milestone-Based Tech Marketplace connecting founders and clients with Indian software developers, designers, and tech talent.
 
 ## Overview
-GigOra is a technical talent marketplace designed around clear milestone-based workflows, transparent project deliverables, real-time client-freelancer collaboration, and escrow-style payment safety.
+IndGig is a technical talent marketplace designed around clear milestone-based workflows, transparent project deliverables, real-time client-freelancer collaboration, and demo payment safety.
 
-- **Founder & Developer:** Vipin Gupta (BSc Computer Science, Mumbai)
+- **Developer:** Vipin Gupta (Self-taught Developer, Mumbai)
 - **Status:** Working Production Prototype & Preview (Live on https://gig-ora.vercel.app)
 - **Tech Stack:** React 19, Tailwind CSS, Vite, Node.js, Express, MongoDB, Socket.io, JWT Authentication.
 
 ## Core Features
-1. **Milestone-Based Escrow Workflow:** Projects are broken down into measurable milestones. Clients fund milestones into escrow before work begins, and funds are released upon review and approval.
+1. **Milestone-Based Workflow:** Projects are broken down into measurable milestones. Clients fund demo milestones before work begins, and milestones are approved upon review.
 2. **Transparent Tech Talent Discovery:** Filter and discover developers and designers specializing in React, Node.js, Python, Full-Stack, AI/ML, DevOps, and UI/UX.
 3. **Real-Time Collaboration:** In-platform workspace with live chat, file attachments, and activity feeds powered by WebSockets.
 4. **Honest Preview Mode:** Clearly marked preview environment running demo payment settlement mode for portfolio review and functional demonstration.
@@ -18,6 +18,6 @@ GigOra is a technical talent marketplace designed around clear milestone-based w
 ## Key URLs
 - Homepage: https://gig-ora.vercel.app/
 - Marketplace: https://gig-ora.vercel.app/marketplace
-- About GigOra: https://gig-ora.vercel.app/about
+- About IndGig: https://gig-ora.vercel.app/about
 - Terms of Service: https://gig-ora.vercel.app/terms
 - Privacy Policy: https://gig-ora.vercel.app/privacy
