@@ -8,13 +8,13 @@ const ThemeContext = createContext({
 
 export const ThemeProvider = ({ children }) => {
   const [themeId, setThemeId] = useState(() => {
-    return localStorage.getItem('gigora_theme') || 'lavender';
+    return localStorage.getItem('indgig_theme') || 'lavender';
   });
 
   const currentTheme = THEMES[themeId] || THEMES.lavender;
 
   useEffect(() => {
-    localStorage.setItem('gigora_theme', themeId);
+    localStorage.setItem('indgig_theme', themeId);
     document.body.style.backgroundColor = currentTheme.bodyBg;
   }, [themeId, currentTheme]);
 

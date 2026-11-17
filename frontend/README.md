@@ -1,6 +1,6 @@
-# 🎨 GigOra Frontend
+# 🎨 IndGig Frontend
 
-Modern, responsive web application for the GigOra marketplace built with React 19, Vite, and Tailwind CSS.
+Modern, responsive web application for the IndGig marketplace built with React 19, Vite, and Tailwind CSS.
 
 ## 🚀 Quick Start
 
@@ -18,7 +18,7 @@ In development, `VITE_API_URL` can be left blank because Vite's dev server autom
 
 In production (e.g. Vercel), set:
 ```env
-VITE_API_URL=https://gigora-backend.onrender.com
+VITE_API_URL=https://indgig-backend.onrender.com
 ```
 
 ### 3. Run Development Server

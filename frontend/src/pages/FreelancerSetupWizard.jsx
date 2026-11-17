@@ -273,7 +273,7 @@ const FreelancerSetupWizard = () => {
             <div className="w-8 h-8 rounded-xl bg-[#030B3D] text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
               G
             </div>
-            <span className="font-extrabold text-lg text-[#030B3D] tracking-tight">GigOra</span>
+            <span className="font-extrabold text-lg text-[#030B3D] tracking-tight">IndGig</span>
           </Link>
 
           <div className="flex items-center gap-4">

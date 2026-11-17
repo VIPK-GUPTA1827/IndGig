@@ -1,4 +1,4 @@
-// Password strength and validation utility for GigOra
+// Password strength and validation utility for IndGig
 // Enforces minimum 12 characters, common password blocking, and rejects "Weak" passwords (requires Fair/Good/Strong)
 
 const COMMON_DISALLOWED_PASSWORDS = new Set([
@@ -9,7 +9,7 @@ const COMMON_DISALLOWED_PASSWORDS = new Set([
     'qwertyuiop12',
     'admin1234567',
     'administrator1',
-    'gigora123456',
+    'indgig123456',
     'welcome12345',
     'iloveyou1234',
     'letmein12345'

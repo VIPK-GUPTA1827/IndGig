@@ -1797,7 +1797,7 @@ export default function FreelancerDashboard() {
                     <p className="text-[11px] text-slate-500 font-medium">Pick a quick avatar or paste your image URL below:</p>
                     <div className="flex items-center gap-1.5">
                       {[
-                        { label: '🤖 Dev Bot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=GigOraDev' },
+                        { label: '🤖 Dev Bot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=IndGigDev' },
                         { label: '👩‍💻 Tech Aria', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aria' },
                         { label: '👨‍💻 Felix Code', url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix' },
                         { label: '⚡ Cyber Bot', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=CodeNinja' }

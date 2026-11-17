@@ -28,7 +28,7 @@ export default function Marketplace() {
       ? '/client/dashboard'
       : '/freelancer/dashboard'
     : '/';
-  const backLabel = user ? 'Back to Dashboard' : 'Back to GigOra';
+  const backLabel = user ? 'Back to Dashboard' : 'Back to IndGig';
   const [searchParams, setSearchParams] = useSearchParams();
   const [gigs, setGigs] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -112,8 +112,8 @@ export default function Marketplace() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Seo 
-        title="Explore Gigs & Tech Projects — GigOra Marketplace"
-        description="Browse open software, web development, mobile apps, and UI/UX projects on GigOra. Work with verified Indian clients with milestone safety."
+        title="Explore Gigs & Tech Projects — IndGig Marketplace"
+        description="Browse open software, web development, mobile apps, and UI/UX projects on IndGig. Work with verified Indian clients with milestone safety."
         canonical="https://gig-ora.vercel.app/marketplace"
       />
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">
@@ -123,7 +123,7 @@ export default function Marketplace() {
         </Link>
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-[#030B3D] text-white flex items-center justify-center font-bold text-xs">G</div>
-          <span className="font-display font-black text-lg text-[#030B3D]">GigOra</span>
+          <span className="font-display font-black text-lg text-[#030B3D]">IndGig</span>
         </div>
       </header>
 

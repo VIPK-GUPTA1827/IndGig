@@ -52,8 +52,8 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col justify-between py-6 px-4 sm:px-6 relative overflow-hidden selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Forgot Password — GigOra"
-        description="Reset your GigOra account password."
+        title="Forgot Password — IndGig"
+        description="Reset your IndGig account password."
         noindex={true}
       />
       
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
           <div className="w-8 h-8 rounded-lg bg-[#030B3D] text-white flex items-center justify-center font-black text-sm">
             G
           </div>
-          <span className="text-xl font-bold tracking-tight text-[#030B3D]">GigOra</span>
+          <span className="text-xl font-bold tracking-tight text-[#030B3D]">IndGig</span>
         </Link>
 
         <Link 
@@ -233,7 +233,7 @@ export default function ForgotPassword() {
 
       {/* Footer */}
       <footer className="max-w-[540px] w-full mx-auto text-center py-4 text-xs text-stone-400 relative z-10">
-        GigOra © {new Date().getFullYear()}
+        IndGig © {new Date().getFullYear()}
       </footer>
     </div>
   );

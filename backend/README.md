@@ -1,6 +1,6 @@
-# ⚙️ GigOra Backend API
+# ⚙️ IndGig Backend API
 
-Production-ready Node.js & Express REST API powering the GigOra freelance marketplace with real-time WebSockets, milestone-based escrow payments, and security hardening.
+Production-ready Node.js & Express REST API powering the IndGig freelance marketplace with real-time WebSockets, milestone-based escrow payments, and security hardening.
 
 ## 🚀 Quick Start
 

@@ -139,7 +139,7 @@ router.post('/test-email', protect, authorize('admin'), async (req, res) => {
       await EmailLog.create({
         recipient: targetEmail.toLowerCase(),
         userId: req.user._id,
-        subject: 'GigOra Test Alert (Simulated Failure)',
+        subject: 'IndGig Test Alert (Simulated Failure)',
         type: 'test_alert',
         status: 'failed',
         error: 'Simulated SMTP connection timeout'
@@ -157,7 +157,7 @@ router.post('/test-email', protect, authorize('admin'), async (req, res) => {
       await EmailLog.create({
         recipient: targetEmail.toLowerCase(),
         userId: req.user._id,
-        subject: 'GigOra Test Alert',
+        subject: 'IndGig Test Alert',
         type: 'test_alert',
         status: 'failed',
         error: 'SMTP transporter not configured'
@@ -171,11 +171,11 @@ router.post('/test-email', protect, authorize('admin'), async (req, res) => {
     }
 
     const mailOptions = {
-      from: '"GigOra" <alerts@gigora.dev>',
+      from: '"IndGig" <alerts@indgig.dev>',
       to: targetEmail,
-      subject: 'GigOra Test Notification',
-      text: 'This is a test notification from GigOra verifying email delivery status.',
-      html: '<p>This is a test notification from GigOra verifying email delivery status.</p>'
+      subject: 'IndGig Test Notification',
+      text: 'This is a test notification from IndGig verifying email delivery status.',
+      html: '<p>This is a test notification from IndGig verifying email delivery status.</p>'
     };
 
     const info = await transporter.sendMail(mailOptions);
@@ -183,7 +183,7 @@ router.post('/test-email', protect, authorize('admin'), async (req, res) => {
     const logEntry = await EmailLog.create({
       recipient: targetEmail.toLowerCase(),
       userId: req.user._id,
-      subject: 'GigOra Test Notification',
+      subject: 'IndGig Test Notification',
       type: 'test_alert',
       status: 'sent',
       messageId: info.messageId || ''
@@ -201,7 +201,7 @@ router.post('/test-email', protect, authorize('admin'), async (req, res) => {
       await EmailLog.create({
         recipient: (req.body.email || req.user.email || 'unknown').toLowerCase(),
         userId: req.user._id,
-        subject: 'GigOra Test Notification',
+        subject: 'IndGig Test Notification',
         type: 'test_alert',
         status: 'failed',
         error: error.message

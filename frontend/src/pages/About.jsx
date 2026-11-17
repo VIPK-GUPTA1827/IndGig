@@ -7,19 +7,19 @@ export default function About() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-slate-900 font-sans selection:bg-accent-text selection:text-white">
       <Seo 
-        title="About GigOra — Milestone-Based Tech Talent Marketplace"
-        description="Learn how GigOra helps founders and Indian developers collaborate safely through milestone escrows and real-time workspaces."
+        title="About IndGig — Milestone-Based Tech Talent Marketplace"
+        description="Learn how IndGig helps founders and Indian developers collaborate safely through milestone escrows and real-time workspaces."
         canonical="https://gig-ora.vercel.app/about"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-sm font-bold text-[#030B3D] hover:text-accent-text transition-colors">
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to GigOra</span>
+          <span>Back to IndGig</span>
         </Link>
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-[#030B3D] text-white flex items-center justify-center font-bold text-xs">G</div>
-          <span className="font-display font-black text-lg text-[#030B3D]">GigOra</span>
+          <span className="font-display font-black text-lg text-[#030B3D]">IndGig</span>
         </div>
       </header>
 
@@ -32,7 +32,7 @@ export default function About() {
             A simpler way to hire and work together
           </h1>
           <p className="text-stone-600 text-base sm:text-lg max-w-2xl leading-relaxed">
-            GigOra is a freelance marketplace for tech talent in India. Founders find developers, agree on the scope, and pay as each milestone is delivered.
+            IndGig is a freelance marketplace for tech talent in India. Founders find developers, agree on the scope, and pay as each milestone is delivered.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function About() {
           
           <section className="space-y-4">
             <h2 className="text-2xl font-display font-bold text-[#030B3D]">
-              Why we're building GigOra
+              Why we're building IndGig
             </h2>
             <p>
               We think hiring and freelancing in tech keeps running into the same problems: unclear requirements, mismatched expectations, and messages that go unanswered.
@@ -107,7 +107,7 @@ export default function About() {
               We're starting with software engineering, web and mobile development, AI/ML, cloud/DevOps and UI/UX. Staying focused lets us fix what isn't working and learn what both sides actually need.
             </p>
             <p>
-              As more people use GigOra and we learn from them, we'll add more tools and more kinds of work.
+              As more people use IndGig and we learn from them, we'll add more tools and more kinds of work.
             </p>
           </section>
 
@@ -133,7 +133,7 @@ export default function About() {
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-stone-100 text-xs text-stone-400">
-            <span>GigOra · Live Preview</span>
+            <span>IndGig · Live Preview</span>
             <span className="font-medium text-stone-500">Built for India's tech community</span>
           </div>
 

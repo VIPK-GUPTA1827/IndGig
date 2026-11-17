@@ -85,8 +85,8 @@ export default function CheckEmail() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-stone-900 flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-hidden selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Check Your Email — GigOra"
-        description="Verify your email address to activate your GigOra account."
+        title="Check Your Email — IndGig"
+        description="Verify your email address to activate your IndGig account."
         noindex={true}
       />
       {/* Corner glow */}
@@ -98,7 +98,7 @@ export default function CheckEmail() {
           <div className="w-8 h-8 rounded-lg bg-[#030B3D] text-white flex items-center justify-center font-black text-sm">
             G
           </div>
-          <span className="text-xl font-bold tracking-tight text-[#030B3D]">GigOra</span>
+          <span className="text-xl font-bold tracking-tight text-[#030B3D]">IndGig</span>
         </Link>
 
         <Link 
@@ -184,7 +184,7 @@ export default function CheckEmail() {
 
       {/* Footer */}
       <footer className="text-center text-xs text-stone-400 py-4 relative z-10">
-        © {new Date().getFullYear()} GigOra
+        © {new Date().getFullYear()} IndGig
       </footer>
     </div>
   );

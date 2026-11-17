@@ -3,7 +3,7 @@ const { checkEnv } = require('../config/env');
 describe('Environment Configuration Guard (checkEnv)', () => {
   const baseValidEnv = {
     NODE_ENV: 'development',
-    MONGO_URI: 'mongodb://localhost:27017/gigora_test',
+    MONGO_URI: 'mongodb://localhost:27017/indgig_test',
     JWT_SECRET: 'super_secret_jwt_key_that_is_long_enough_32_chars'
   };
 

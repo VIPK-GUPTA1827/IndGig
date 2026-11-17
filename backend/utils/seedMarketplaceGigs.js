@@ -451,12 +451,12 @@ async function seed() {
     console.log('Connected to MongoDB');
 
     // 1. Find or create a professional demo client
-    let client = await User.findOne({ email: 'client@gigora.in' });
+    let client = await User.findOne({ email: 'client@indgig.in' });
     if (!client) {
       client = await User.create({
         name: 'Aura Systems India',
         username: 'aurasystems',
-        email: 'client@gigora.in',
+        email: 'client@indgig.in',
         password: '$2a$10$e7Zc5Xj1YdK3.P9yVbQ3b.2h1k4l7m0n9p8q7r6s5t4u3v2w1x0yZ',
         role: 'client',
         companyName: 'Aura Cloud Technologies Pvt Ltd',

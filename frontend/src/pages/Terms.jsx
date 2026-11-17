@@ -7,19 +7,19 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-slate-900 font-sans selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Terms of Service — GigOra Marketplace"
-        description="Read the Terms of Service for GigOra. Understand our milestone escrow workflows, payment rules, user responsibilities, and dispute handling."
+        title="Terms of Service — IndGig Marketplace"
+        description="Read the Terms of Service for IndGig. Understand our milestone escrow workflows, payment rules, user responsibilities, and dispute handling."
         canonical="https://gig-ora.vercel.app/terms"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-sm font-bold text-[#030B3D] hover:text-accent-text transition-colors">
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to GigOra</span>
+          <span>Back to IndGig</span>
         </Link>
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-[#030B3D] text-white flex items-center justify-center font-bold text-xs">G</div>
-          <span className="font-display font-black text-lg text-[#030B3D]">GigOra</span>
+          <span className="font-display font-black text-lg text-[#030B3D]">IndGig</span>
         </div>
       </header>
 
@@ -40,7 +40,7 @@ export default function Terms() {
           <div>
             <span className="font-bold block text-amber-950 mb-1">Live Preview Notice</span>
             <p className="text-amber-900/90 leading-relaxed font-medium">
-              GigOra is running as a live preview. Marketplace features are functional. Payments run in demo mode only — no real money is held, transferred, or processed.
+              IndGig is running as a live preview. Marketplace features are functional. Payments run in demo mode only — no real money is held, transferred, or processed.
             </p>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function Terms() {
               1. Platform Status & Scope
             </h2>
             <p>
-              GigOra is currently a live preview freelance marketplace for technical talent in India. Marketplace browsing, project posting, proposals, and milestone collaboration tools are functional. Payments currently operate in a simulated demo mode.
+              IndGig is currently a live preview freelance marketplace for technical talent in India. Marketplace browsing, project posting, proposals, and milestone collaboration tools are functional. Payments currently operate in a simulated demo mode.
             </p>
             <p>
               The platform focuses on <strong>Software Development, Cloud & DevOps, AI/ML, and Product UI/UX</strong>.
@@ -66,7 +66,7 @@ export default function Terms() {
               2. Eligibility & Accounts
             </h2>
             <p>
-              You must be at least 18 years old to create an account and enter into project agreements on GigOra. Users agree to maintain only one primary account per person or legal entity, and provide accurate profile information.
+              You must be at least 18 years old to create an account and enter into project agreements on IndGig. Users agree to maintain only one primary account per person or legal entity, and provide accurate profile information.
             </p>
             <p>
               You are responsible for safeguarding your login credentials and for all activities that occur under your account.
@@ -79,7 +79,7 @@ export default function Terms() {
               3. Milestone Workflow
             </h2>
             <p>
-              GigOra provides structured milestone tools to assist users in defining project scope, timelines, and deliverables:
+              IndGig provides structured milestone tools to assist users in defining project scope, timelines, and deliverables:
             </p>
             <ul className="space-y-2 list-disc list-inside text-stone-600 text-sm">
               <li><strong>Scope Definition:</strong> Encouraging clients and freelancers to agree on clear acceptance criteria before work begins.</li>
@@ -117,7 +117,7 @@ export default function Terms() {
               6. Acceptable Use & Conduct
             </h2>
             <p>
-              We expect all participants in the GigOra community to interact professionally and honestly. You agree not to post fake or misleading profile details, send unsolicited spam, engage in harassment, or scrape platform data.
+              We expect all participants in the IndGig community to interact professionally and honestly. You agree not to post fake or misleading profile details, send unsolicited spam, engage in harassment, or scrape platform data.
             </p>
             <p>
               Misrepresenting skills, engaging in abusive behavior, or attempting unauthorized access to preview services may result in account suspension or removal.
@@ -130,7 +130,7 @@ export default function Terms() {
               7. Dispute Resolution
             </h2>
             <p>
-              During preview mode, disputes regarding project deliverables or milestone approval are mediated informally by the GigOra admin team. Because payments operate in demo mode, monetary chargebacks or fund clawbacks are not available.
+              During preview mode, disputes regarding project deliverables or milestone approval are mediated informally by the IndGig admin team. Because payments operate in demo mode, monetary chargebacks or fund clawbacks are not available.
             </p>
           </section>
 
@@ -140,7 +140,7 @@ export default function Terms() {
               8. Limitation of Liability
             </h2>
             <p>
-              GigOra is provided on an "as is" and "as available" basis during preview. To the maximum extent permitted by applicable law, GigOra and its team shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of this preview service.
+              IndGig is provided on an "as is" and "as available" basis during preview. To the maximum extent permitted by applicable law, IndGig and its team shall not be liable for any indirect, incidental, special, or consequential damages arising from the use of this preview service.
             </p>
           </section>
 
@@ -176,7 +176,7 @@ export default function Terms() {
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-stone-100 text-xs text-stone-400">
-            <span>GigOra · Terms of Service</span>
+            <span>IndGig · Terms of Service</span>
             <span className="font-medium text-stone-500">Last updated: October 2026</span>
           </div>
 

@@ -86,7 +86,7 @@ export default function PublicProfile() {
         // Handle both shapes (data.user or data.data)
         const userObj = data.data || data.user;
         setProfileData(userObj);
-        document.title = `${userObj?.name || userObj?.username || 'Profile'} — GigOra`;
+        document.title = `${userObj?.name || userObj?.username || 'Profile'} — IndGig`;
       } catch (err) {
         console.error('Profile fetch failed:', err);
         setError(err.message || 'Failed to load user profile');
@@ -142,7 +142,7 @@ export default function PublicProfile() {
   }
 
   const isFreelancer = profileData.role === 'freelancer';
-  const displayName = profileData.name || profileData.username || 'GigOra User';
+  const displayName = profileData.name || profileData.username || 'IndGig User';
   const locationCity = profileData.location?.city || 'Mumbai';
   const locationState = profileData.location?.state || 'India';
   const skillsList = Array.isArray(profileData.skills)
@@ -152,8 +152,8 @@ export default function PublicProfile() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 pb-16">
       <Seo 
-        title={`${profileData.name || profileData.username || 'Tech Talent'} — GigOra Profile`}
-        description={profileData.bio ? profileData.bio.slice(0, 150) : `View ${profileData.name || 'tech talent'}'s portfolio, verified skills, and project history on GigOra.`}
+        title={`${profileData.name || profileData.username || 'Tech Talent'} — IndGig Profile`}
+        description={profileData.bio ? profileData.bio.slice(0, 150) : `View ${profileData.name || 'tech talent'}'s portfolio, verified skills, and project history on IndGig.`}
         canonical={`https://gig-ora.vercel.app/profile/${username}`}
       />
       {/* Top Navbar */}
@@ -171,7 +171,7 @@ export default function PublicProfile() {
               <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent to-accent-deep flex items-center justify-center text-white text-sm font-black shadow-sm">
                 G
               </span>
-              GigOra
+              IndGig
             </Link>
           </div>
 
@@ -240,7 +240,7 @@ export default function PublicProfile() {
                   )}
 
                   {profileData.isEmailVerified && (
-                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white shadow-xs" title="Verified GigOra Member">
+                    <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-white shadow-xs" title="Verified IndGig Member">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
                   )}
@@ -258,7 +258,7 @@ export default function PublicProfile() {
 
                   {isFreelancer ? (
                     <p className="text-sm sm:text-base font-semibold text-slate-700">
-                      {profileData.headline || 'Independent Specialist on GigOra'}
+                      {profileData.headline || 'Independent Specialist on IndGig'}
                     </p>
                   ) : (
                     <p className="text-sm sm:text-base font-semibold text-slate-700">
@@ -570,10 +570,10 @@ export default function PublicProfile() {
                 </div>
               </div>
 
-              {/* GigOra Verified Stats Widget */}
+              {/* IndGig Verified Stats Widget */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider text-slate-500">
-                  GigOra Activity
+                  IndGig Activity
                 </h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs pb-2 border-b border-slate-100">

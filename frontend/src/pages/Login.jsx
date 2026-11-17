@@ -84,8 +84,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-hidden selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Sign In to Your Account — GigOra"
-        description="Log in to GigOra to access your client or freelancer dashboard, manage milestones, chat in real-time, and track payments."
+        title="Sign In to Your Account — IndGig"
+        description="Log in to IndGig to access your client or freelancer dashboard, manage milestones, chat in real-time, and track payments."
         canonical="https://gig-ora.vercel.app/login"
       />
       
@@ -100,7 +100,7 @@ export default function Login() {
           <div className="w-9 h-9 rounded-xl bg-[#030B3D] text-white flex items-center justify-center font-black text-base shadow-md group-hover:scale-105 transition-transform">
             G
           </div>
-          <span className="text-xl font-black tracking-tight text-[#030B3D]">GigOra</span>
+          <span className="text-xl font-black tracking-tight text-[#030B3D]">IndGig</span>
         </Link>
 
         <Link 

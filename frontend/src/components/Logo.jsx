@@ -36,7 +36,7 @@ const Logo = ({ size = 'md', showTagline = true, to = '/' }) => {
           className="w-full h-full"
         >
           <defs>
-            <linearGradient id="gigoraPureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="indgigPureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#6366F1" />
               <stop offset="100%" stopColor="#4F46E5" />
             </linearGradient>
@@ -45,7 +45,7 @@ const Logo = ({ size = 'md', showTagline = true, to = '/' }) => {
           {/* Bold Naked Stylized 'G' Mark (Zero Background Box) */}
           <path 
             d="M24.5 12.2C22.8 10.8 20.5 10 17.8 10C12.9 10 9 13.6 9 18.2C9 22.8 12.9 26.4 17.8 26.4C22.4 26.4 25.9 23.4 26.4 19.2H18.2V15.8H30C30 16.6 30 17.4 30 18.2C30 24.8 24.6 30 17.8 30C10.7 30 5 24.7 5 18.2C5 11.7 10.7 6.4 17.8 6.4C21.7 6.4 25.1 7.9 27.6 10.4L24.5 12.2Z" 
-            fill="url(#gigoraPureGrad)" 
+            fill="url(#indgigPureGrad)" 
           />
           {/* Dynamic Talent Spark Node */}
           <circle cx="27" cy="9.5" r="2.8" fill="#818CF8" />
@@ -56,7 +56,7 @@ const Logo = ({ size = 'md', showTagline = true, to = '/' }) => {
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5">
           <span className={`${currentSize.text} font-black tracking-tight text-slate-900 group-hover:text-accent-text transition-colors`}>
-            Gig<span className="text-accent-text">Ora</span>
+            Ind<span className="text-accent-text">Gig</span>
           </span>
           <span className={`${currentSize.badge} font-bold bg-accent-tint text-indigo-700 border border-accent-soft/80 rounded uppercase tracking-wider`}>
             IN

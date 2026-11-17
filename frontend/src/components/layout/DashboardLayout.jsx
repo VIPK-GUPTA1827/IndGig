@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, LogOut, Eye, ArrowRightLeft } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 
-// Sets the browser tab title per page (fixes "Create Account — GigOra" on dashboards) and ensures noindex.
+// Sets the browser tab title per page (fixes "Create Account — IndGig" on dashboards) and ensures noindex.
 export function usePageTitle(title) {
   useEffect(() => {
-    document.title = title ? `${title} · GigOra` : 'GigOra';
+    document.title = title ? `${title} · IndGig` : 'IndGig';
     let el = document.querySelector('meta[name="robots"]');
     if (!el) {
       el = document.createElement('meta');
@@ -86,7 +86,7 @@ export default function DashboardLayout({
       <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col bg-navy text-white p-4 z-40">
         <Link to="/" className="flex items-center gap-2 px-2 py-2 min-h-11">
           <span className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-bold text-sm">G</span>
-          <span className="font-semibold tracking-tight">GigOra</span>
+          <span className="font-semibold tracking-tight">IndGig</span>
         </Link>
         <p className="px-2 mt-1 mb-4 text-xs text-slate-400">{roleLabel}</p>
         <nav aria-label="Main" className="flex flex-col gap-1">
@@ -103,7 +103,7 @@ export default function DashboardLayout({
         {/* Slim top header: title, bell, one user menu. */}
         <header className="sticky top-0 z-30 bg-surface border-b border-border">
           <div className="h-14 px-4 sm:px-6 flex items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-ink md:hidden">GigOra</p>
+            <p className="text-sm font-semibold text-ink md:hidden">IndGig</p>
             <p className="hidden md:block text-sm text-muted">{title}</p>
             <div className="flex items-center gap-2">
               {headerRight}

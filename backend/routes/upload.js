@@ -126,7 +126,7 @@ router.post('/', protect, uploadLimiter, handleUpload, async (req, res, next) =>
 
     try {
         if (isCloudinaryConfigured) {
-            const result = await streamUploadToCloudinary(req.file.buffer, `gigora/${req.user._id}`);
+            const result = await streamUploadToCloudinary(req.file.buffer, `indgig/${req.user._id}`);
             return res.status(200).json({
                 success: true,
                 message: 'File uploaded successfully.',

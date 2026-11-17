@@ -3,7 +3,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'DemoGigora#2026';
+const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'Demoindgig#2026';
 
 const DEMO_USERS = [
   {

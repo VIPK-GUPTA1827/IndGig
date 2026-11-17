@@ -12,8 +12,8 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-[#F7F9FB] flex flex-col justify-between font-sans text-[#243040]">
       <Seo 
-        title="Page Not Found — GigOra" 
-        description="The requested page could not be found on GigOra."
+        title="Page Not Found — IndGig" 
+        description="The requested page could not be found on IndGig."
         noindex={true}
       />
       {/* Mini Header */}
@@ -23,7 +23,7 @@ export default function NotFound() {
             <div className="h-8 w-8 rounded-xl bg-[#2F6FAB] text-white font-black text-sm flex items-center justify-center">
               G
             </div>
-            <span className="font-bold text-lg text-[#243040]">GigOra</span>
+            <span className="font-bold text-lg text-[#243040]">IndGig</span>
           </Link>
           <Link
             to="/marketplace"
@@ -90,7 +90,7 @@ export default function NotFound() {
               <li>
                 <Link to="/about" className="hover:text-[#2F6FAB] transition-colors flex items-center gap-2">
                   <span className="w-3.5 h-3.5 rounded-full bg-[#EAF1F7] text-[#2F6FAB] text-[9px] flex items-center justify-center font-bold">i</span>
-                  <span>About GigOra</span>
+                  <span>About IndGig</span>
                 </Link>
               </li>
             </ul>
@@ -100,7 +100,7 @@ export default function NotFound() {
 
       {/* Mini Footer */}
       <footer className="py-5 px-6 border-t border-[#DDE5ED] text-center text-xs text-[#5A6675] bg-[#EAF1F7]">
-        <p>© {new Date().getFullYear()} GigOra. Built for people who build software.</p>
+        <p>© {new Date().getFullYear()} IndGig. Built for people who build software.</p>
       </footer>
     </div>
   );

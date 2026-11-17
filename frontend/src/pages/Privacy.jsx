@@ -7,19 +7,19 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-slate-900 font-sans selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Privacy Policy — GigOra Marketplace"
-        description="Learn how GigOra collects, stores, and protects your account information, workspace chats, and user data with strict privacy safeguards."
+        title="Privacy Policy — IndGig Marketplace"
+        description="Learn how IndGig collects, stores, and protects your account information, workspace chats, and user data with strict privacy safeguards."
         canonical="https://gig-ora.vercel.app/privacy"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 text-sm font-bold text-[#030B3D] hover:text-accent-text transition-colors">
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to GigOra</span>
+          <span>Back to IndGig</span>
         </Link>
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-[#030B3D] text-white flex items-center justify-center font-bold text-xs">G</div>
-          <span className="font-display font-black text-lg text-[#030B3D]">GigOra</span>
+          <span className="font-display font-black text-lg text-[#030B3D]">IndGig</span>
         </div>
       </header>
 
@@ -40,7 +40,7 @@ export default function Privacy() {
           <div>
             <span className="font-bold block text-indigo-950 mb-1">Live Preview Architecture Disclosure</span>
             <p className="text-indigo-900/90 leading-relaxed font-medium">
-              GigOra currently operates as a live preview developer marketplace. Account creation, profile management, and project milestone tracking are live on GigOra's preview deployment. Financial transactions operate strictly in <strong>Simulated Sandbox Escrow (simulated testing without real currency)</strong> mode without real banking charges.
+              IndGig currently operates as a live preview developer marketplace. Account creation, profile management, and project milestone tracking are live on IndGig's preview deployment. Financial transactions operate strictly in <strong>Simulated Sandbox Escrow (simulated testing without real currency)</strong> mode without real banking charges.
             </p>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function Privacy() {
               1. Account Authentication & Credential Storage
             </h2>
             <p>
-              When you sign up or sign in to GigOra, we collect your name, username, email address, account role (client or freelancer), and password.
+              When you sign up or sign in to IndGig, we collect your name, username, email address, account role (client or freelancer), and password.
             </p>
             <ul className="space-y-2 list-disc list-inside text-stone-600 text-sm">
               <li><strong>Password Security:</strong> Passwords are never stored in plaintext. All passwords are cryptographically salted and hashed using <strong>bcrypt</strong> before being stored in our database.</li>
@@ -183,7 +183,7 @@ export default function Privacy() {
           </div>
 
           <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-t border-stone-100 text-xs text-stone-400">
-            <span>GigOra · Privacy Policy</span>
+            <span>IndGig · Privacy Policy</span>
             <span className="font-medium text-stone-500">Last updated: October 2026</span>
           </div>
 

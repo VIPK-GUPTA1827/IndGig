@@ -74,9 +74,9 @@ const getSenderEmail = () => {
         return process.env.SMTP_FROM;
     }
     if (process.env.SMTP_USER) {
-        return `"GigOra" <${process.env.SMTP_USER}>`;
+        return `"IndGig" <${process.env.SMTP_USER}>`;
     }
-    return '"GigOra" <no-reply@gigora.dev>';
+    return '"IndGig" <no-reply@indgig.dev>';
 };
 
 // Safe, standardized user object formatter across all auth responses
@@ -234,7 +234,7 @@ const createVerificationToken = () => {
 };
 
 const sendVerificationEmail = async (user, raw, subject) => {
-    subject = subject || 'Verify your email - GigOra';
+    subject = subject || 'Verify your email - IndGig';
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
     const link = `${clientUrl}/verify-email/${raw}`;
     let status = 'sent', error = '', messageId = '';
@@ -245,12 +245,12 @@ const sendVerificationEmail = async (user, raw, subject) => {
         if (!transporter) throw new Error('Mail service offline');
 
         const info = await transporter.sendMail({
-            from: typeof getSenderEmail === 'function' ? getSenderEmail() : '"GigOra" <alerts@gigora.dev>',
+            from: typeof getSenderEmail === 'function' ? getSenderEmail() : '"IndGig" <alerts@indgig.dev>',
             to: user.email,
             subject,
             text: `Verify your email: ${link}`,
             html: `<div style="font-family: sans-serif; max-width: 560px; margin: auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px;">
-                    <h2 style="color: #593CFF; margin-top: 0;">Verify your GigOra Account</h2>
+                    <h2 style="color: #593CFF; margin-top: 0;">Verify your IndGig Account</h2>
                     <p>Click below to verify your email address:</p>
                     <p style="margin: 20px 0;"><a href="${link}" style="background: #593CFF; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Verify Email</a></p>
                     <p style="color: #64748b; font-size: 13px;">This link expires in 24 hours.</p>
@@ -683,7 +683,7 @@ router.post('/resend-verification', authLimiter, async (req, res) => {
         user.emailVerificationSentAt = new Date();
         await user.save();
 
-        const result = await sendVerificationEmail(user, v.raw, 'New verification link - GigOra');
+        const result = await sendVerificationEmail(user, v.raw, 'New verification link - IndGig');
         if (!result.sent) {
             return fail(res, 503, 'Could not send email. Try again soon.');
         }
@@ -753,13 +753,13 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
             const info = await transporter.sendMail({
                 from: getSenderEmail(),
                 to: user.email,
-                subject: 'Reset your password - GigOra',
-                text: `You requested a password reset for your GigOra account. Click the link below to set a new password:\n\n${resetUrl}\n\nThis link will expire in 30 minutes. If you did not request this, you can safely ignore this email.`,
+                subject: 'Reset your password - IndGig',
+                text: `You requested a password reset for your IndGig account. Click the link below to set a new password:\n\n${resetUrl}\n\nThis link will expire in 30 minutes. If you did not request this, you can safely ignore this email.`,
                 html: `
                     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; border: 1px solid #E2E8F0; border-radius: 16px; background-color: #FAF8F5;">
                         <div style="display: flex; align-items: center; margin-bottom: 24px;">
                             <div style="background-color: #030B3D; color: white; width: 36px; height: 36px; border-radius: 8px; font-weight: 900; font-size: 18px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 36px;">G</div>
-                            <span style="margin-left: 10px; font-size: 20px; font-weight: 800; color: #030B3D;">GigOra</span>
+                            <span style="margin-left: 10px; font-size: 20px; font-weight: 800; color: #030B3D;">IndGig</span>
                         </div>
                         <h2 style="color: #030B3D; margin-top: 0; font-size: 22px;">Reset your password</h2>
                         <p style="color: #475569; font-size: 14px; line-height: 1.6;">Hi ${user.name || user.username}, we received a request to reset your password. Click the button below to choose a new password:</p>

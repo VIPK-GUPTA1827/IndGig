@@ -114,8 +114,8 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col justify-between py-8 px-4 sm:px-6 relative overflow-hidden selection:bg-accent-text selection:text-white">
       <Seo 
-        title="Create Your Account — Join GigOra Today"
-        description="Join GigOra as a client or freelancer. Hire verified Indian technical talent or find freelance projects with secure milestone escrow protection."
+        title="Create Your Account — Join IndGig Today"
+        description="Join IndGig as a client or freelancer. Hire verified Indian technical talent or find freelance projects with secure milestone escrow protection."
         canonical="https://gig-ora.vercel.app/signup"
       />
       
@@ -130,7 +130,7 @@ export default function Signup() {
           <div className="w-9 h-9 rounded-xl bg-[#030B3D] text-white flex items-center justify-center font-black text-base shadow-md group-hover:scale-105 transition-transform">
             G
           </div>
-          <span className="text-xl font-black tracking-tight text-[#030B3D]">GigOra</span>
+          <span className="text-xl font-black tracking-tight text-[#030B3D]">IndGig</span>
         </Link>
 
         <Link 
@@ -148,7 +148,7 @@ export default function Signup() {
           
           <div className="text-center mb-6">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#030B3D]">
-              Join GigOra
+              Join IndGig
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
               Sign up to post projects or send proposals. Payments are in demo mode while we test.

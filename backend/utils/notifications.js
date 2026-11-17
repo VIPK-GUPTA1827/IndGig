@@ -60,15 +60,15 @@ const sendNotification = async (app, recipientId, senderId, type, title, message
           const actionLink = destinationUrl ? `${clientUrl}${destinationUrl}` : `${clientUrl}/`;
 
           const mailOptions = {
-            from: '"GigOra" <alerts@gigora.dev>',
+            from: '"IndGig" <alerts@indgig.dev>',
             to: recipient.email,
-            subject: `GigOra Alerts: ${title}`,
-            text: `${message}\n\nCheck your GigOra workspace: ${actionLink}`,
+            subject: `IndGig Alerts: ${title}`,
+            text: `${message}\n\nCheck your IndGig workspace: ${actionLink}`,
             html: `<div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; color: #1e293b;">
-                    <h2 style="color: #593CFF; margin-top: 0;">GigOra Updates</h2>
+                    <h2 style="color: #593CFF; margin-top: 0;">IndGig Updates</h2>
                     <p style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">${escapeHtml(title)}</p>
                     <p style="font-size: 13px; color: #475569; line-height: 1.6;">${escapeHtml(message)}</p>
-                    <a href="${escapeHtml(actionLink)}" target="_blank" style="display: inline-block; background: #593CFF; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; margin-top: 15px;">Open in GigOra</a>
+                    <a href="${escapeHtml(actionLink)}" target="_blank" style="display: inline-block; background: #593CFF; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 12px; margin-top: 15px;">Open in IndGig</a>
                    </div>`
           };
 
@@ -98,7 +98,7 @@ const sendNotification = async (app, recipientId, senderId, type, title, message
         await EmailLog.create({
           recipient: recipient.email,
           userId: recipient._id,
-          subject: `GigOra Alerts: ${title}`,
+          subject: `IndGig Alerts: ${title}`,
           type,
           status: emailStatus,
           error: emailError,

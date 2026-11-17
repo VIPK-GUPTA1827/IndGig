@@ -56,20 +56,20 @@ export default function GoogleAuthButton({ role = 'client', isSignup = false, te
         setScriptLoaded(true);
         try {
           // Keep active component's callback synced globally
-          window.__gigoraGsiCallback = (response) => handlerRef.current(response);
+          window.__indgigGsiCallback = (response) => handlerRef.current(response);
 
           // Prevent multiple initializations that trigger GSI warning
-          if (!window.__gigoraGsiInitialized) {
+          if (!window.__indgigGsiInitialized) {
             window.google.accounts.id.initialize({
               client_id: clientId,
               callback: (response) => {
-                if (typeof window.__gigoraGsiCallback === 'function') {
-                  window.__gigoraGsiCallback(response);
+                if (typeof window.__indgigGsiCallback === 'function') {
+                  window.__indgigGsiCallback(response);
                 }
               },
               auto_select: false
             });
-            window.__gigoraGsiInitialized = true;
+            window.__indgigGsiInitialized = true;
           }
 
           if (buttonRef.current) {

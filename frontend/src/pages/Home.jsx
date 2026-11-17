@@ -86,7 +86,7 @@ export default function Home() {
               <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#2F6FAB] text-white font-black text-base sm:text-lg shadow-xs group-hover:bg-[#255889] transition-colors">
                 G
               </div>
-              <span className="text-lg sm:text-xl font-display font-black text-[#243040] tracking-tight">GigOra</span>
+              <span className="text-lg sm:text-xl font-display font-black text-[#243040] tracking-tight">IndGig</span>
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -242,7 +242,7 @@ export default function Home() {
 
               {/* Honest Preview Notice */}
               <div className="bg-[#EAF1F7] border border-[#DDE5ED] px-4 py-3 rounded-xl text-xs sm:text-sm text-[#243040] font-medium leading-relaxed">
-                <strong>GigOra is in preview.</strong> Marketplace and workspaces are live; payments run in demo mode, so no real money moves yet.
+                <strong>IndGig is in preview.</strong> Marketplace and workspaces are live; payments run in demo mode, so no real money moves yet.
               </div>
 
               {/* Search Bar Input */}
@@ -305,8 +305,8 @@ export default function Home() {
                 {/* Main Visual Image (3D Developer Character) */}
                 <div className="relative w-full h-full rounded-2xl overflow-hidden border-2 border-white shadow-md bg-white transition-all duration-300 group-hover:shadow-lg">
                   <img
-                    src="/images/gigora_3d_developer_hero.jpg"
-                    alt="GigOra 3D Developer working on milestone project"
+                    src="/images/indgig_3d_developer_hero.jpg"
+                    alt="IndGig 3D Developer working on milestone project"
                     className="w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.02]"
                   />
                 </div>
@@ -357,7 +357,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Card 3: About GigOra */}
+            {/* Card 3: About IndGig */}
             <motion.div 
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -369,7 +369,7 @@ export default function Home() {
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-[#243040] text-sm sm:text-base">About GigOra</h3>
+                <h3 className="font-display font-bold text-[#243040] text-sm sm:text-base">About IndGig</h3>
                 <p className="text-xs text-[#5A6675] mt-1 leading-relaxed">
                   A dedicated milestone platform built for technical founders and Indian software developers.
                 </p>
@@ -442,7 +442,7 @@ export default function Home() {
               SIMPLE 3-STEP PROCESS
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-[#243040] mt-3 mb-2">
-              How GigOra Works
+              How IndGig Works
             </h2>
             <p className="text-[#5A6675] text-sm">
               Three steps from idea to delivered work.
@@ -558,7 +558,7 @@ export default function Home() {
               Made for clients and freelancers
             </h2>
             <p className="text-[#5A6675] text-sm">
-              Hiring for your startup or looking for your next project? GigOra keeps both sides clear on what's expected.
+              Hiring for your startup or looking for your next project? IndGig keeps both sides clear on what's expected.
             </p>
           </div>
 
@@ -694,13 +694,13 @@ export default function Home() {
               Frequently Asked Questions
             </h2>
             <p className="text-[#5A6675] text-sm">
-              Honest answers about how GigOra works right now.
+              Honest answers about how IndGig works right now.
             </p>
           </div>
 
           <div className="space-y-3">
             {[
-              { q: 'Is GigOra free right now?', a: 'Yes. Browsing projects, posting them and sending proposals are free during preview. Payments run in demo mode, so no real money moves.' },
+              { q: 'Is IndGig free right now?', a: 'Yes. Browsing projects, posting them and sending proposals are free during preview. Payments run in demo mode, so no real money moves.' },
               { q: 'How do milestones work?', a: 'Clients split a project into milestones. Freelancers submit work for each milestone, and clients review and approve it before it is marked complete.' },
               { q: 'How are freelancer profiles reviewed?', a: "Anyone can create a profile for now. You can see skills, bio and reviews on each one. We don't verify profiles yet." },
               { q: 'What are the platform fees?', a: 'No fees during preview. Fee details will be published before real payments go live.' }
@@ -764,9 +764,9 @@ export default function Home() {
             {/* Brand Column */}
             <div className="md:col-span-4 space-y-2.5">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2F6FAB] text-white font-bold text-sm">G</div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#2F6FAB] text-white font-bold text-xs">IG</div>
                 <span className="text-base font-bold text-[#243040] tracking-tight">
-                  GigOra
+                  IndGig
                 </span>
                 <span className="text-[9px] bg-white text-[#2F6FAB] font-bold px-1.5 py-0.5 rounded border border-[#DDE5ED]">IN</span>
               </div>
@@ -787,7 +787,7 @@ export default function Home() {
                   <li><a href="/#choose-path" className="hover:text-[#2F6FAB] transition-colors">Clients &amp; Devs</a></li>
                   <li><a href="/#features" className="hover:text-[#2F6FAB] transition-colors">Features</a></li>
                   <li><a href="/#faq" className="hover:text-[#2F6FAB] transition-colors">FAQ</a></li>
-                  <li><Link to="/about" className="text-[#2F6FAB] hover:underline font-bold">About GigOra</Link></li>
+                  <li><Link to="/about" className="text-[#2F6FAB] hover:underline font-bold">About IndGig</Link></li>
                 </ul>
               </div>
 
@@ -816,7 +816,7 @@ export default function Home() {
           
           <div className="pt-6 border-t border-[#DDE5ED] flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
-              <p>© {new Date().getFullYear()} GigOra. All rights reserved.</p>
+              <p>© {new Date().getFullYear()} IndGig. All rights reserved.</p>
               <Link to="/terms" className="hover:text-[#2F6FAB] transition-colors">Terms</Link>
               <Link to="/privacy" className="hover:text-[#2F6FAB] transition-colors">Privacy</Link>
               <Link to="/about" className="hover:text-[#2F6FAB] transition-colors">About</Link>

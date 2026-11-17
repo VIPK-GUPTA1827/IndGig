@@ -34,7 +34,7 @@ export default function GigDetail() {
         const res = await api.get(`/api/gigs/${id}`);
         if (!cancelled) {
           setGig(res.data);
-          document.title = res.data?.title ? `${res.data.title} — GigOra` : 'Project Detail — GigOra';
+          document.title = res.data?.title ? `${res.data.title} — IndGig` : 'Project Detail — IndGig';
           setBidAmount(String(res.data.budget || ''));
         }
       } catch (err) {
@@ -95,8 +95,8 @@ export default function GigDetail() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Seo 
-        title={gig.title ? `${gig.title} — GigOra` : 'Project Detail — GigOra'}
-        description={gig.description ? gig.description.slice(0, 150) : 'Explore project deliverables and milestones on GigOra.'}
+        title={gig.title ? `${gig.title} — IndGig` : 'Project Detail — IndGig'}
+        description={gig.description ? gig.description.slice(0, 150) : 'Explore project deliverables and milestones on IndGig.'}
         canonical={`https://gig-ora.vercel.app/gigs/${id}`}
       />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">

@@ -9,7 +9,7 @@ export const COMMON_WEAK_PASSWORDS = new Set([
   'qwertyuiop12',
   'admin1234567',
   'administrator1',
-  'gigora123456',
+  'indgig123456',
   'welcome12345',
   'iloveyou1234',
   'letmein12345'
