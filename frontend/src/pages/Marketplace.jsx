@@ -114,7 +114,7 @@ export default function Marketplace() {
       <Seo 
         title="Explore Gigs & Tech Projects — IndGig Marketplace"
         description="Browse open software, web development, mobile apps, and UI/UX projects on IndGig. Work with verified Indian clients with milestone safety."
-        canonical="https://gig-ora.vercel.app/marketplace"
+        canonical="https://indgig.vercel.app/marketplace"
       />
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">
         <Link to={backUrl} className="flex items-center gap-2 text-sm font-semibold text-[#030B3D] hover:text-[#2F6FAB] transition-colors">

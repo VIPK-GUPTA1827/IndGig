@@ -97,7 +97,7 @@ export default function GigDetail() {
       <Seo 
         title={gig.title ? `${gig.title} — IndGig` : 'Project Detail — IndGig'}
         description={gig.description ? gig.description.slice(0, 150) : 'Explore project deliverables and milestones on IndGig.'}
-        canonical={`https://gig-ora.vercel.app/gigs/${id}`}
+        canonical={`https://indgig.vercel.app/gigs/${id}`}
       />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <Link to="/marketplace" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mb-5">

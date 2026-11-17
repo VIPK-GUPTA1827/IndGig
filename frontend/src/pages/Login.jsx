@@ -86,7 +86,7 @@ export default function Login() {
       <Seo 
         title="Sign In to Your Account — IndGig"
         description="Log in to IndGig to access your client or freelancer dashboard, manage milestones, chat in real-time, and track payments."
-        canonical="https://gig-ora.vercel.app/login"
+        canonical="https://indgig.vercel.app/login"
       />
       
       {/* Ambient Gradient Background Glows */}

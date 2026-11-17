@@ -40,8 +40,8 @@ describe('Environment Configuration Guard (checkEnv)', () => {
 
     const validProd = {
       ...env,
-      CLIENT_URL: 'https://gig-ora.vercel.app',
-      CORS_ORIGINS: 'https://gig-ora.vercel.app'
+      CLIENT_URL: 'https://indgig.vercel.app',
+      CORS_ORIGINS: 'https://indgig.vercel.app'
     };
     const prodRes = checkEnv(validProd);
     expect(prodRes.valid).toBe(true);

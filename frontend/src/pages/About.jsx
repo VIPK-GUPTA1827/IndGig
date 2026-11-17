@@ -9,7 +9,7 @@ export default function About() {
       <Seo 
         title="About IndGig — Milestone-Based Tech Talent Marketplace"
         description="Learn how IndGig helps founders and Indian developers collaborate safely through milestone escrows and real-time workspaces."
-        canonical="https://gig-ora.vercel.app/about"
+        canonical="https://indgig.vercel.app/about"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">

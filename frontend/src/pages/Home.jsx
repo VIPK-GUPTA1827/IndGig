@@ -66,7 +66,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F7F9FB] font-sans text-[#243040] selection:bg-[#2F6FAB] selection:text-white relative">
-      <Seo canonical="https://gig-ora.vercel.app/" />
+      <Seo canonical="https://indgig.vercel.app/" />
       
       {/* 1. TOP FLOATING NAVBAR (Sky Blue & Amber Theme) */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 py-3 px-3 sm:px-6 flex justify-center ${

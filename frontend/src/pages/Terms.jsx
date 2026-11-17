@@ -9,7 +9,7 @@ export default function Terms() {
       <Seo 
         title="Terms of Service — IndGig Marketplace"
         description="Read the Terms of Service for IndGig. Understand our milestone escrow workflows, payment rules, user responsibilities, and dispute handling."
-        canonical="https://gig-ora.vercel.app/terms"
+        canonical="https://indgig.vercel.app/terms"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const BASE_URL = 'https://gig-ora.vercel.app';
+const BASE_URL = 'https://indgig.vercel.app';
 const DEFAULT_TITLE = 'IndGig — Milestone-Based Marketplace for Technical Talent';
 const DEFAULT_DESC = 'Discover Indian technical talent, agree on deliverables, and collaborate with milestone-based workflows and real-time workspaces on IndGig.';
 const DEFAULT_IMAGE = `${BASE_URL}/og/default.png`;

@@ -9,7 +9,7 @@ export default function Privacy() {
       <Seo 
         title="Privacy Policy — IndGig Marketplace"
         description="Learn how IndGig collects, stores, and protects your account information, workspace chats, and user data with strict privacy safeguards."
-        canonical="https://gig-ora.vercel.app/privacy"
+        canonical="https://indgig.vercel.app/privacy"
       />
       {/* Header */}
       <header className="border-b border-stone-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-50 py-4 px-6 sm:px-12 flex items-center justify-between">

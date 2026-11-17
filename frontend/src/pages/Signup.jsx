@@ -116,7 +116,7 @@ export default function Signup() {
       <Seo 
         title="Create Your Account — Join IndGig Today"
         description="Join IndGig as a client or freelancer. Hire verified Indian technical talent or find freelance projects with secure milestone escrow protection."
-        canonical="https://gig-ora.vercel.app/signup"
+        canonical="https://indgig.vercel.app/signup"
       />
       
       {/* Ambient Gradient Background Glows */}

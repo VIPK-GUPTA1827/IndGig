@@ -10,4 +10,4 @@ Disallow: /reset-password
 Disallow: /verify-email
 Disallow: /check-email
 
-Sitemap: https://gig-ora.vercel.app/sitemap.xml
+Sitemap: https://indgig.vercel.app/sitemap.xml

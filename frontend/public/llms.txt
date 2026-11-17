@@ -6,7 +6,7 @@
 IndGig is a technical talent marketplace designed around clear milestone-based workflows, transparent project deliverables, real-time client-freelancer collaboration, and demo payment safety.
 
 - **Developer:** Vipin Gupta (Self-taught Developer, Mumbai)
-- **Status:** Working Production Prototype & Preview (Live on https://gig-ora.vercel.app)
+- **Status:** Working Production Prototype & Preview (Live on https://indgig.vercel.app)
 - **Tech Stack:** React 19, Tailwind CSS, Vite, Node.js, Express, MongoDB, Socket.io, JWT Authentication.
 
 ## Core Features
@@ -16,8 +16,8 @@ IndGig is a technical talent marketplace designed around clear milestone-based w
 4. **Honest Preview Mode:** Clearly marked preview environment running demo payment settlement mode for portfolio review and functional demonstration.
 
 ## Key URLs
-- Homepage: https://gig-ora.vercel.app/
-- Marketplace: https://gig-ora.vercel.app/marketplace
-- About IndGig: https://gig-ora.vercel.app/about
-- Terms of Service: https://gig-ora.vercel.app/terms
-- Privacy Policy: https://gig-ora.vercel.app/privacy
+- Homepage: https://indgig.vercel.app/
+- Marketplace: https://indgig.vercel.app/marketplace
+- About IndGig: https://indgig.vercel.app/about
+- Terms of Service: https://indgig.vercel.app/terms
+- Privacy Policy: https://indgig.vercel.app/privacy
