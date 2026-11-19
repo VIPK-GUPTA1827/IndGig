@@ -54,7 +54,7 @@ app.use('/uploads', express.static(
 
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 
-app.use('/api', notFound);
+app.use(['/api', '/api/v1'], notFound);
 app.use(errorHandler);
 
 module.exports = app;

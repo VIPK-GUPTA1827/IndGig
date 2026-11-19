@@ -284,81 +284,97 @@ router.put('/:milestoneId/checklist', protect, async (req, res) => {
 // @desc    Approve milestone & release escrow to freelancer
 // @route   PUT /api/gigs/:id/milestones/:milestoneId/approve
 // @access  Private (Client owner or admin)
-router.put('/:milestoneId/approve', protect, async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id) || !mongoose.Types.ObjectId.isValid(req.params.milestoneId)) {
-        throw new AppError('Invalid project or milestone ID format', 400);
-    }
-
-    const out = await withTransaction(async (session) => {
-        const gig = await Gig.findById(req.params.id).session(session);
-        if (!gig) throw new AppError('Gig contract not found', 404);
-
-        if (gig.client.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-            throw new AppError('Not authorized to approve milestones for this project', 403);
+router.put('/:milestoneId/approve', protect, async (req, res, next) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id) || !mongoose.Types.ObjectId.isValid(req.params.milestoneId)) {
+            throw new AppError('Invalid project or milestone ID format', 400);
         }
 
-        if (!gig.freelancer) {
-            throw new AppError('No freelancer assigned to this contract', 400);
-        }
+        const out = await withTransaction(async (session) => {
+            const gig = await Gig.findById(req.params.id).session(session);
+            if (!gig) throw new AppError('Gig contract not found', 404);
 
-        const milestone = gig.milestones.id(req.params.milestoneId);
-        if (!milestone) throw new AppError('Milestone not found', 404);
+            if (gig.client.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+                throw new AppError('Not authorized to approve milestones for this project', 403);
+            }
 
-        if (milestone.status === 'completed') {
-            throw new AppError('Milestone has already been approved and paid', 400);
-        }
+            if (!gig.freelancer) {
+                throw new AppError('No freelancer assigned to this contract', 400);
+            }
 
-        const amountToRelease = Number(milestone.budget || milestone.amount || 0);
-        if (amountToRelease <= 0) {
-            throw new AppError('Milestone amount must be greater than zero to release payment', 400);
-        }
+            const milestone = gig.milestones.id(req.params.milestoneId);
+            if (!milestone) throw new AppError('Milestone not found', 404);
 
-        const escrow = await Escrow.findOne({ gig: gig._id, status: 'held' }).session(session);
-        if (!escrow || escrow.amount < amountToRelease) {
-            throw new AppError(
-                `No active escrow; milestone was not approved. Required: ₹${amountToRelease}, Held: ₹${escrow ? escrow.amount : 0}`,
-                409
-            );
-        }
+            if (milestone.status === 'completed') {
+                throw new AppError('Milestone has already been approved and paid', 400);
+            }
 
-        escrow.amount -= amountToRelease;
-        if (escrow.amount <= 0) {
-            escrow.status = 'released';
-        }
-        await escrow.save({ session });
+            const amountToRelease = Number(milestone.budget || milestone.amount || 0);
+            if (amountToRelease <= 0) {
+                throw new AppError('Milestone amount must be greater than zero to release payment', 400);
+            }
 
-        await credit(gig.freelancer, amountToRelease, {
-            type: 'milestone_release',
-            description: `Payment for milestone: "${milestone.title}" on project "${gig.title}"`,
-            referenceId: gig._id,
-            session
+            const escrow = await Escrow.findOne({
+                gig: gig._id,
+                status: { $in: ['held', 'partially-released'] }
+            }).session(session);
+
+            const heldRemaining = escrow ? Math.max(0, escrow.amount - (escrow.releasedAmount || 0)) : 0;
+            if (!escrow || heldRemaining < amountToRelease) {
+                throw new AppError(
+                    `No active escrow; milestone was not approved. Required: ₹${amountToRelease}, Held: ₹${heldRemaining}`,
+                    409
+                );
+            }
+
+            escrow.releasedAmount = (escrow.releasedAmount || 0) + amountToRelease;
+            if (escrow.releasedAmount >= escrow.amount) {
+                escrow.status = 'released';
+            } else {
+                escrow.status = 'partially-released';
+            }
+            await escrow.save({ session });
+
+            // Atomically credit freelancer within transaction session
+            await credit(gig.freelancer, amountToRelease, session);
+
+            // Create ledger transaction entry within session
+            await Transaction.create([{
+                user: gig.freelancer,
+                type: 'release',
+                amount: amountToRelease,
+                description: `Payment for milestone: "${milestone.title}" on project "${gig.title}"`,
+                referenceId: gig._id
+            }], { session });
+
+            milestone.status = 'completed';
+            milestone.completedAt = new Date();
+
+            const allDone = gig.milestones.length > 0 && gig.milestones.every(m => m.status === 'completed');
+            if (allDone) {
+                gig.status = 'completed';
+                gig.completedAt = new Date();
+            }
+
+            await gig.save({ session });
+
+            return { gig, milestone, released: amountToRelease, allDone };
         });
 
-        milestone.status = 'completed';
-        milestone.completedAt = new Date();
+        sendNotification(
+            req.app,
+            out.gig.freelancer,
+            req.user._id,
+            'milestone_approved',
+            'Milestone Approved & Paid!',
+            `"${out.milestone.title}" approved, ₹${out.released.toLocaleString('en-IN')} released.`,
+            out.gig._id
+        );
 
-        const allDone = gig.milestones.length > 0 && gig.milestones.every(m => m.status === 'completed');
-        if (allDone) {
-            gig.status = 'completed';
-            gig.completedAt = new Date();
-        }
-
-        await gig.save({ session });
-
-        return { gig, milestone, released: amountToRelease, allDone };
-    });
-
-    sendNotification(
-        req.app,
-        out.gig.freelancer,
-        req.user._id,
-        'milestone_approved',
-        'Milestone Approved & Paid!',
-        `"${out.milestone.title}" approved, ₹${out.released.toLocaleString('en-IN')} released.`,
-        out.gig._id
-    );
-
-    res.json({ success: true, data: out.gig });
+        res.json({ success: true, data: out.gig });
+    } catch (err) {
+        next(err);
+    }
 });
 
 module.exports = router;

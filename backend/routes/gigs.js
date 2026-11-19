@@ -538,13 +538,16 @@ router.put('/:id', protect, async (req, res) => {
             }
         }
 
+        // Invalidate public gigs cache so updates immediately reflect
+        clearCache('cache:/api/gigs').catch(() => {});
+
         res.status(200).json({ 
             success: true, 
             message: targetStatus === 'draft' ? 'Draft saved' : (wasDraft && targetStatus === 'open' ? 'Project published!' : 'Project updated successfully'),
             data: gig 
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 
@@ -581,82 +584,92 @@ router.delete('/:id', protect, async (req, res) => {
 
         await Gig.findByIdAndDelete(req.params.id);
 
+        // Invalidate public gigs cache so deleted project immediately disappears from feed
+        clearCache('cache:/api/gigs').catch(() => {});
+
         res.status(200).json({ success: true, message: 'Gig deleted successfully' });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        next(error);
     }
 });
 
 // @desc    Complete a gig and release remaining escrow funds
 // @route   PUT /api/gigs/:id/complete
 // @access  Private (Client only)
-router.put('/:id/complete', protect, async (req, res) => {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid gig ID format'
+router.put('/:id/complete', protect, async (req, res, next) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid gig ID format'
+            });
+        }
+
+        const isAdmin = req.user.role === 'admin';
+        const out = await withTransaction(async (session) => {
+            // 1. Claim: sirf in-progress, sirf owner (ya admin)
+            const gig = await Gig.findOneAndUpdate(
+                {
+                    _id: req.params.id,
+                    status: 'in-progress',
+                    ...(isAdmin ? {} : { client: req.user._id })
+                },
+                {
+                    $set: {
+                        status: 'completed',
+                        'milestones.$[].status': 'completed'
+                    }
+                },
+                { returnDocument: 'after', session }
+            );
+            if (!gig) {
+                throw new AppError('Gig not found or not in-progress', 409);
+            }
+
+            // 2. Escrow ka bacha paisa release
+            const escrow = await Escrow.findOne({
+                gig: gig._id,
+                status: { $in: ['held', 'partially-released'] }
+            }).session(session);
+
+            if (!escrow) throw new AppError('No active escrow', 404);
+
+            const remaining = Math.max(0, escrow.amount - escrow.releasedAmount);
+            escrow.releasedAmount = escrow.amount;
+            escrow.status = 'released';
+            await escrow.save({ session });
+
+            if (remaining > 0) {
+                await credit(gig.freelancer, remaining, session);
+                await Transaction.create([{
+                    user: gig.freelancer,
+                    type: 'release',
+                    amount: remaining,
+                    description: `Escrow payout for "${gig.title}"`,
+                    referenceId: gig._id
+                }], { session });
+            }
+
+            return { gig, remaining };
         });
-    }
 
-    const isAdmin = req.user.role === 'admin';
-    const out = await withTransaction(async (session) => {
-        // 1. Claim: sirf in-progress, sirf owner (ya admin)
-        const gig = await Gig.findOneAndUpdate(
-            {
-                _id: req.params.id,
-                status: 'in-progress',
-                ...(isAdmin ? {} : { client: req.user._id })
-            },
-            {
-                $set: {
-                    status: 'completed',
-                    'milestones.$[].status': 'completed'
-                }
-            },
-            { returnDocument: 'after', session }
+        // Invalidate public gigs cache so completed status immediately updates
+        clearCache('cache:/api/gigs').catch(() => {});
+
+        sendNotification(
+            req.app,
+            out.gig.freelancer,
+            req.user._id,
+            'proposal_accepted',
+            'Gig Completed!',
+            `"${out.gig.title}" completed. ₹${out.remaining.toLocaleString('en-IN')} released.`,
+            out.gig._id
         );
-        if (!gig) {
-            throw new AppError('Gig not found or not in-progress', 409);
-        }
 
-        // 2. Escrow ka bacha paisa release
-        const escrow = await Escrow.findOne({
-            gig: gig._id,
-            status: { $in: ['held', 'partially-released'] }
-        }).session(session);
-
-        if (!escrow) throw new AppError('No active escrow', 404);
-
-        const remaining = Math.max(0, escrow.amount - escrow.releasedAmount);
-        escrow.releasedAmount = escrow.amount;
-        escrow.status = 'released';
-        await escrow.save({ session });
-
-        if (remaining > 0) {
-            await credit(gig.freelancer, remaining, session);
-            await Transaction.create([{
-                user: gig.freelancer,
-                type: 'release',
-                amount: remaining,
-                description: `Escrow payout for "${gig.title}"`,
-                referenceId: gig._id
-            }], { session });
-        }
-
-        return { gig, remaining };
-    });
-
-    sendNotification(
-        req.app,
-        out.gig.freelancer,
-        req.user._id,
-        'proposal_accepted',
-        'Gig Completed!',
-        `"${out.gig.title}" completed. ₹${out.remaining.toLocaleString('en-IN')} released.`,
-        out.gig._id
-    );
-
-    res.json({ success: true, data: out.gig });
+        res.json({ success: true, data: out.gig });
+    } catch (err) {
+        next(err);
+    }
 });
 
 // Milestone Sub-Router (modularized under RealWorld architecture standard)
