@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ShieldCheck, Code2, Users, AlertCircle, Compass } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Code2, AlertCircle, Compass } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Seo from '../components/Seo';
 

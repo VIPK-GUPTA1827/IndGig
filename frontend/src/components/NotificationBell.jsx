@@ -4,16 +4,13 @@ import api from '../utils/api';
 import { API_BASE } from '../utils/apiBase';
 import { 
   Bell, 
-  Check, 
   CheckCheck, 
   FileText, 
   CheckCircle2, 
   XCircle, 
   UploadCloud, 
   AlertCircle, 
-  Sparkles, 
-  Clock,
-  ExternalLink
+  Sparkles
 } from 'lucide-react';
 import io from 'socket.io-client';
 

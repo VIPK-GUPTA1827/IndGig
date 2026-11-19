@@ -6,8 +6,6 @@ import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { 
   Briefcase, 
-  LogOut, 
-  ArrowRightLeft, 
   Sparkles, 
   CheckCircle2, 
   AlertCircle, 
@@ -23,7 +21,6 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
-  Eye,
   SlidersHorizontal,
   RotateCcw,
   Tag,
@@ -39,10 +36,6 @@ const getGreeting = () => {
   if (hour < 18) return 'Good afternoon';
   return 'Good evening';
 };
-
-const CURRENT_YEAR = new Date().getFullYear();
-
-const BASE = API_BASE;
 
 export default function FreelancerDashboard() {
   const { user, logout, switchRole, loading, updateUser } = useAuth();
@@ -211,7 +204,6 @@ export default function FreelancerDashboard() {
 
   // Time-based dynamic greeting
   const greeting = getGreeting();
-  const currentYear = CURRENT_YEAR;
 
   // Profile completion criteria (100% strictly matched with checklist)
   const hasName = Boolean(user.name && user.name.trim());

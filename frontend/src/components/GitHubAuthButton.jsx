@@ -6,7 +6,7 @@ export default function GitHubAuthButton({ role = 'freelancer', text = 'Continue
 
   // If user clicks back button from GitHub (bfcache / back navigation), reset loading state
   useEffect(() => {
-    const handlePageShow = (event) => {
+    const handlePageShow = () => {
       setLoading(false);
     };
     window.addEventListener('pageshow', handlePageShow);

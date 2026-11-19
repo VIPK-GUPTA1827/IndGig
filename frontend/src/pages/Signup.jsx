@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft, ShieldCheck, Zap, Lock } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft, ShieldCheck, Lock } from 'lucide-react';
 import PasswordStrengthMeter, { evaluatePassword } from '../components/PasswordStrengthMeter';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import GitHubAuthButton from '../components/GitHubAuthButton';

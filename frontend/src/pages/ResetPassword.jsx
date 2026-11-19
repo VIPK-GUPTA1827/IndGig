@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
 import PasswordStrengthMeter, { evaluatePassword } from '../components/PasswordStrengthMeter';
 import api from '../utils/api';
@@ -7,7 +7,6 @@ import Seo from '../components/Seo';
 
 export default function ResetPassword() {
   const { token } = useParams();
-  const navigate = useNavigate();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
