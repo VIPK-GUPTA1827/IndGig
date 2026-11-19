@@ -21,10 +21,16 @@ export default function GitHubAuthButton({ role = 'freelancer', text = 'Continue
     // Save chosen role in sessionStorage so callback page knows whether client or freelancer
     sessionStorage.setItem('oauth_role', role);
 
-    // GitHub OAuth URL with user and user:email scope
+    // Generate and store cryptographically secure state for CSRF protection
+    const state = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2) + Date.now().toString(36);
+    sessionStorage.setItem('oauth_state', state);
+
+    // GitHub OAuth URL with user, user:email scope and state parameter
     const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
       redirectUri
-    )}&scope=read:user%20user:email`;
+    )}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`;
 
     window.location.href = githubUrl;
   };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { sanitizeUrl } from '../utils/sanitizeUrl';
 import { useAuth } from '../context/AuthContext';
 import Seo from '../components/Seo';
 import {
@@ -306,9 +307,9 @@ export default function PublicProfile() {
             {/* Social & Code Links Bar */}
             {(profileData.socialLinks || profileData.companyWebsite) && (
               <div className="pt-4 border-t border-slate-100 flex items-center gap-3 flex-wrap">
-                {profileData.socialLinks?.github && (
+                {profileData.socialLinks?.github && sanitizeUrl(profileData.socialLinks.github) !== '#' && (
                   <a
-                    href={profileData.socialLinks.github.startsWith('http') ? profileData.socialLinks.github : `https://${profileData.socialLinks.github}`}
+                    href={sanitizeUrl(profileData.socialLinks.github)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl transition"
@@ -319,9 +320,9 @@ export default function PublicProfile() {
                   </a>
                 )}
 
-                {profileData.socialLinks?.linkedin && (
+                {profileData.socialLinks?.linkedin && sanitizeUrl(profileData.socialLinks.linkedin) !== '#' && (
                   <a
-                    href={profileData.socialLinks.linkedin.startsWith('http') ? profileData.socialLinks.linkedin : `https://${profileData.socialLinks.linkedin}`}
+                    href={sanitizeUrl(profileData.socialLinks.linkedin)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0A66C2] hover:text-[#004182] bg-blue-50/60 hover:bg-blue-100/60 border border-blue-200 px-3 py-1.5 rounded-xl transition"
@@ -332,11 +333,9 @@ export default function PublicProfile() {
                   </a>
                 )}
 
-                {(profileData.socialLinks?.website || profileData.companyWebsite) && (
+                {(profileData.socialLinks?.website || profileData.companyWebsite) && sanitizeUrl(profileData.socialLinks?.website || profileData.companyWebsite) !== '#' && (
                   <a
-                    href={(profileData.socialLinks?.website || profileData.companyWebsite).startsWith('http') 
-                      ? (profileData.socialLinks?.website || profileData.companyWebsite) 
-                      : `https://${profileData.socialLinks?.website || profileData.companyWebsite}`}
+                    href={sanitizeUrl(profileData.socialLinks?.website || profileData.companyWebsite)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-accent-text hover:text-accent-deep bg-accent-tint/60 hover:bg-emerald-100/60 border border-accent-soft px-3 py-1.5 rounded-xl transition"
@@ -347,9 +346,9 @@ export default function PublicProfile() {
                   </a>
                 )}
 
-                {profileData.socialLinks?.twitter && (
+                {profileData.socialLinks?.twitter && sanitizeUrl(profileData.socialLinks.twitter) !== '#' && (
                   <a
-                    href={profileData.socialLinks.twitter.startsWith('http') ? profileData.socialLinks.twitter : `https://${profileData.socialLinks.twitter}`}
+                    href={sanitizeUrl(profileData.socialLinks.twitter)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl transition"
@@ -431,10 +430,11 @@ export default function PublicProfile() {
 
                         {(() => {
                           const projectLink = item.projectUrl || item.link || item.githubUrl;
-                          if (!projectLink) return null;
+                          const safeLink = sanitizeUrl(projectLink);
+                          if (!projectLink || safeLink === '#') return null;
                           return (
                             <a
-                              href={projectLink.startsWith('http') ? projectLink : `https://${projectLink}`}
+                              href={safeLink}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 text-xs font-bold text-accent-text hover:text-accent-deep mt-auto"
