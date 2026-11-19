@@ -1,11 +1,9 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, Loader2, ArrowLeft, RefreshCw } from 'lucide-react';
 import PasswordStrengthMeter, { evaluatePassword } from '../components/PasswordStrengthMeter';
+import api from '../utils/api';
 import Seo from '../components/Seo';
-
-const BASE = API_BASE;
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -44,24 +42,20 @@ export default function ResetPassword() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${BASE}/api/auth/reset-password/${token}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, confirmPassword })
-      });
+      const data = await api.put(`/api/auth/reset-password/${token}`, { password, confirmPassword });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data && data.success) {
         setSuccess(true);
       } else {
-        setError(data.message || 'Failed to update password');
-        if (res.status === 400 && (data.message?.includes('Invalid') || data.message?.includes('expired'))) {
-          setTokenInvalid(true);
-        }
+        setError(data?.message || 'Failed to update password');
       }
     } catch (err) {
-      setError(err.message || 'A network error occurred. Please try again.');
+      const d = err.response?.data || err.data;
+      const msg = d?.message || err.message || 'A network error occurred. Please try again.';
+      setError(msg);
+      if (err.status === 400 && (msg.includes('Invalid') || msg.includes('expired'))) {
+        setTokenInvalid(true);
+      }
     } finally {
       setSubmitting(false);
     }

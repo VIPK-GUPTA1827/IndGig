@@ -1,6 +1,6 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import Seo from '../components/Seo';
 import {
@@ -46,8 +46,6 @@ const TwitterIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-const BASE = API_BASE;
-
 export default function PublicProfile() {
   const { id } = useParams();
   const { user: currentUser } = useAuth();
@@ -69,19 +67,14 @@ export default function PublicProfile() {
       try {
         let endpoint = '';
         if (!id || id === 'me') {
-          endpoint = '/api/auth/me';
+          endpoint = '/auth/me';
         } else {
-          endpoint = `/api/auth/user/${id}`;
+          endpoint = `/auth/user/${id}`;
         }
 
-        const res = await fetch(`${BASE}${endpoint}`, {
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include'
-        });
-
-        const data = await res.json();
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || 'Profile not found');
+        const data = await api.get(endpoint);
+        if (!data || !data.success) {
+          throw new Error(data?.message || 'Profile not found');
         }
 
         // Handle both shapes (data.user or data.data)

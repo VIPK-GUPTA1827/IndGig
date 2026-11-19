@@ -1,10 +1,8 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import api from '../utils/api';
 import Seo from '../components/Seo';
-
-const BASE = API_BASE;
 
 export default function CheckEmail() {
   const [searchParams] = useSearchParams();
@@ -29,8 +27,7 @@ export default function CheckEmail() {
   // Agar pending email nahi hai aur search param bhi nahi hai, toh /me se email uthao
   useEffect(() => {
     if (email) return;
-    fetch(`${BASE}/api/auth/me`, { credentials: 'include' })
-      .then((res) => res.json())
+    api.get('/api/auth/me')
       .then((data) => {
         if (data?.user?.email) setEmail(data.user.email);
       })
@@ -56,28 +53,24 @@ export default function CheckEmail() {
     setPreviewUrl('');
 
     try {
-      const res = await fetch(`${BASE}/api/auth/resend-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email })
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await api.post('/api/auth/resend-verification', { email });
+      if (data && data.success) {
         setStatusMsg('A fresh verification link has been sent to your inbox.');
         setSeconds(60);
         if (data.previewUrl || data.etherealUrl) {
           setPreviewUrl(data.previewUrl || data.etherealUrl);
         }
       } else {
-        if (res.status === 429 && data.retryAfter) {
-          setSeconds(data.retryAfter);
-        }
-        setErrorMsg(data.message || 'Could not resend email.');
+        setErrorMsg(data?.message || 'Could not resend email.');
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Network error occurred.');
+      const d = err.response?.data || err.data;
+      if (err.status === 429 && d?.retryAfter) {
+        setSeconds(d.retryAfter);
+        setErrorMsg(d.message || `Please wait ${d.retryAfter}s before requesting another email.`);
+      } else {
+        setErrorMsg(d?.message || err.message || 'Could not resend email.');
+      }
     } finally {
       setResending(false);
     }

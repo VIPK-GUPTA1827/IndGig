@@ -1,7 +1,7 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { 
@@ -104,8 +104,7 @@ export default function FreelancerDashboard() {
   // Helper to re-fetch contracts after milestone submission
   const fetchContracts = async () => {
     try {
-      const res = await fetch(`${BASE}/api/gigs/freelancer/my-contracts`, { credentials: 'include' });
-      const data = await res.json();
+      const data = await api.get('/api/gigs/freelancer/my-contracts');
       if (data.success) {
         setContracts(data.data || []);
       }
@@ -121,8 +120,7 @@ export default function FreelancerDashboard() {
       // Fetch rule-matched gigs from backend
       let loadedGigs = [];
       try {
-        const matchedRes = await fetch(`${BASE}/api/freelancer/matched-gigs`, { credentials: 'include' });
-        const matchedData = await matchedRes.json();
+        const matchedData = await api.get('/api/freelancer/matched-gigs');
         if (matchedData.success) {
           loadedGigs = matchedData.allGigs || matchedData.matchedGigs || [];
         }
@@ -131,8 +129,7 @@ export default function FreelancerDashboard() {
       }
 
       if (loadedGigs.length === 0) {
-        const gigsRes = await fetch(`${BASE}/api/gigs?status=open&limit=50`);
-        const gigsData = await gigsRes.json();
+        const gigsData = await api.get('/api/gigs?status=open&limit=50');
         if (gigsData.success) {
           loadedGigs = gigsData.data || [];
         }
@@ -140,8 +137,7 @@ export default function FreelancerDashboard() {
 
       // Also merge closed gigs so freelancers can inspect past/archive projects under Closed Projects tab
       try {
-        const allRes = await fetch(`${BASE}/api/gigs?status=all&limit=50`);
-        const allData = await allRes.json();
+        const allData = await api.get('/api/gigs?status=all&limit=50');
         if (allData.success && Array.isArray(allData.data)) {
           const openIds = new Set(loadedGigs.map(g => String(g._id)));
           const closedGigsList = allData.data.filter(g => g.status === 'closed' && !openIds.has(String(g._id)));
@@ -154,16 +150,14 @@ export default function FreelancerDashboard() {
       setGigs(loadedGigs);
 
       // Fetch My Proposals
-      const propRes = await fetch(`${BASE}/api/proposals/my-proposals`, { credentials: 'include' });
-      const propData = await propRes.json();
+      const propData = await api.get('/api/proposals/my-proposals');
       if (propData.success) {
         setProposals(propData.data || []);
       }
 
       // Fetch My Active & Completed Contracts (Step 6 Work Tracking)
       try {
-        const bookRes = await fetch(`${BASE}/api/gigs/freelancer/my-contracts`, { credentials: 'include' });
-        const bookData = await bookRes.json();
+        const bookData = await api.get('/api/gigs/freelancer/my-contracts');
         if (bookData.success) {
           setContracts(bookData.data || []);
         }
@@ -265,21 +259,15 @@ export default function FreelancerDashboard() {
         .map(s => s.trim())
         .filter(Boolean);
 
-      const res = await fetch(`${BASE}/api/auth/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: profileForm.name.trim(),
-          avatar: profileForm.avatar ? profileForm.avatar.trim() : undefined,
-          bio: profileForm.bio.trim(),
-          skills: skillsArray,
-          hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined
-        })
+      const data = await api.put('/api/auth/profile', {
+        name: profileForm.name.trim(),
+        avatar: profileForm.avatar ? profileForm.avatar.trim() : undefined,
+        bio: profileForm.bio.trim(),
+        skills: skillsArray,
+        hourlyRate: profileForm.hourlyRate ? Number(profileForm.hourlyRate) : undefined
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to update profile');
       }
 
@@ -311,21 +299,15 @@ export default function FreelancerDashboard() {
         .map(t => t.trim())
         .filter(Boolean);
 
-      const res = await fetch(`${BASE}/api/auth/portfolio`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          title: portfolioForm.title.trim(),
-          description: portfolioForm.description.trim(),
-          link: portfolioForm.link.trim(),
-          githubUrl: portfolioForm.githubUrl.trim(),
-          tags: tagsArray
-        })
+      const data = await api.post('/api/auth/portfolio', {
+        title: portfolioForm.title.trim(),
+        description: portfolioForm.description.trim(),
+        link: portfolioForm.link.trim(),
+        githubUrl: portfolioForm.githubUrl.trim(),
+        tags: tagsArray
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to add portfolio item');
       }
 
@@ -403,20 +385,14 @@ export default function FreelancerDashboard() {
     }
 
     try {
-      const res = await fetch(`${BASE}/api/proposals`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          gigId: selectedGigForBid._id,
-          bidAmount: bid,
-          estimatedTime: proposalForm.estimatedTime.trim(),
-          coverLetter: proposalForm.coverLetter.trim()
-        })
+      const data = await api.post('/api/proposals', {
+        gigId: selectedGigForBid._id,
+        bidAmount: bid,
+        estimatedTime: proposalForm.estimatedTime.trim(),
+        coverLetter: proposalForm.coverLetter.trim()
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to submit proposal');
       }
 
@@ -437,12 +413,8 @@ export default function FreelancerDashboard() {
   const handleWithdrawProposal = async (proposalId) => {
     if (!window.confirm('Are you sure you want to withdraw this proposal?')) return;
     try {
-      const res = await fetch(`${BASE}/api/proposals/${proposalId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      const data = await api.delete(`/api/proposals/${proposalId}`);
+      if (!data.success) {
         throw new Error(data.message || 'Failed to withdraw proposal');
       }
       setProposals(prev => prev.filter(p => p._id !== proposalId));
@@ -473,17 +445,11 @@ export default function FreelancerDashboard() {
     setDeliverableError('');
     try {
       const { gigId, milestone } = selectedContractMilestone;
-      const res = await fetch(`${BASE}/api/gigs/${gigId}/milestones/${milestone._id}/submit`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          deliverableUrl: deliverableForm.deliverableUrl.trim(),
-          deliverableNotes: deliverableForm.deliverableNotes.trim()
-        })
+      const data = await api.put(`/api/gigs/${gigId}/milestones/${milestone._id}/submit`, {
+        deliverableUrl: deliverableForm.deliverableUrl.trim(),
+        deliverableNotes: deliverableForm.deliverableNotes.trim()
       });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to submit deliverable');
       }
       setIsDeliverableModalOpen(false);

@@ -1,10 +1,8 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, KeyRound, AlertCircle, CheckCircle2, Loader2, ArrowLeft, ExternalLink } from 'lucide-react';
+import api from '../utils/api';
 import Seo from '../components/Seo';
-
-const BASE = API_BASE;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -26,25 +24,20 @@ export default function ForgotPassword() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`${BASE}/api/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      });
+      const data = await api.post('/api/auth/forgot-password', { email: email.trim() });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data && data.success) {
         setSubmitted(true);
         setMailMode(data.mailMode || '');
         if (data.etherealUrl) {
           setEtherealUrl(data.etherealUrl);
         }
       } else {
-        setError(data.message || 'Unable to send reset link. Please check your email and try again.');
+        setError(data?.message || 'Unable to send reset link. Please check your email and try again.');
       }
     } catch (err) {
-      setError(err.message || 'Network error occurred. Please try again.');
+      const d = err.response?.data || err.data;
+      setError(d?.message || err.message || 'Network error occurred. Please try again.');
     } finally {
       setSubmitting(false);
     }

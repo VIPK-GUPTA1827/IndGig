@@ -1,8 +1,8 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Button, Card, StatCard, PageHeader, BarChart } from '../components/ui';
@@ -124,21 +124,13 @@ export default function ClientDashboard() {
     setLoadingData(true);
     try {
       // 1. Fetch Client's Gigs
-      const gigsRes = await fetch(`${BASE}/api/gigs/client/my-gigs`, {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-      const gigsData = await gigsRes.json();
+      const gigsData = await api.get('/api/gigs/client/my-gigs');
       if (gigsData.success) {
         setMyGigs(gigsData.data || []);
       }
 
       // 2. Fetch All Proposals Received for Client's Gigs
-      const propRes = await fetch(`${BASE}/api/proposals/client/all-proposals`, {
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-      const propData = await propRes.json();
+      const propData = await api.get('/api/proposals/client/all-proposals');
       if (propData.success) {
         setProposals(propData.data || []);
       }
@@ -195,15 +187,8 @@ export default function ClientDashboard() {
         }
       };
 
-      const res = await fetch(`${BASE}/api/auth/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      const data = await api.put('/api/auth/profile', payload);
+      if (!data.success) {
         throw new Error(data.message || 'Failed to update company profile');
       }
 
@@ -331,30 +316,26 @@ export default function ClientDashboard() {
 
     try {
       setIsSubmittingGig(true);
-      const url = editingGigId ? `${BASE}/api/gigs/${editingGigId}` : `${BASE}/api/gigs`;
-      const method = editingGigId ? 'PUT' : 'POST';
+      const endpoint = editingGigId ? `/api/gigs/${editingGigId}` : '/api/gigs';
+      const gigPayload = {
+        title: formData.title.trim(),
+        category: formData.category,
+        description: formData.description.trim(),
+        budget: formData.budget ? Number(formData.budget) : 0,
+        locationType: formData.locationType,
+        address: formData.locationType === 'onsite' ? (formData.address || 'Mumbai, Maharashtra') : 'Remote / Online',
+        experienceLevel: formData.experienceLevel,
+        duration: formData.duration,
+        deadline: formData.deadline || null,
+        skillsRequired: formData.skillsRequired,
+        status: editingGigId && !isEditingDraft ? undefined : targetStatus
+      };
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          title: formData.title.trim(),
-          category: formData.category,
-          description: formData.description.trim(),
-          budget: formData.budget ? Number(formData.budget) : 0,
-          locationType: formData.locationType,
-          address: formData.locationType === 'onsite' ? (formData.address || 'Mumbai, Maharashtra') : 'Remote / Online',
-          experienceLevel: formData.experienceLevel,
-          duration: formData.duration,
-          deadline: formData.deadline || null,
-          skillsRequired: formData.skillsRequired,
-          status: editingGigId && !isEditingDraft ? undefined : targetStatus
-        })
-      });
+      const data = editingGigId 
+        ? await api.put(endpoint, gigPayload) 
+        : await api.post(endpoint, gigPayload);
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || 'Failed to save project');
       }
 
@@ -382,14 +363,8 @@ export default function ClientDashboard() {
   const handleQuickPublish = async (gigId) => {
     try {
       setActionLoadingId(gigId);
-      const res = await fetch(`${BASE}/api/gigs/${gigId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status: 'open' })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to publish draft');
+      const data = await api.put(`/api/gigs/${gigId}`, { status: 'open' });
+      if (!data.success) throw new Error(data.message || 'Failed to publish draft');
       setSuccessMsg(`Your project is live. Freelancers can now send proposals.`);
       await fetchClientData();
     } catch (err) {
@@ -403,14 +378,8 @@ export default function ClientDashboard() {
   const handleSetStatus = async (gigId, newStatus) => {
     try {
       setActionLoadingId(gigId);
-      const res = await fetch(`${BASE}/api/gigs/${gigId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status: newStatus })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || `Failed to update status to ${newStatus}`);
+      const data = await api.put(`/api/gigs/${gigId}`, { status: newStatus });
+      if (!data.success) throw new Error(data.message || `Failed to update status to ${newStatus}`);
       
       const statusLabels = {
         open: 'Your project is open. Freelancers can send proposals.',
@@ -437,12 +406,8 @@ export default function ClientDashboard() {
     if (!window.confirm('Are you sure you want to delete this project listing?')) return;
     try {
       setActionLoadingId(gigId);
-      const res = await fetch(`${BASE}/api/gigs/${gigId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Failed to delete project');
+      const data = await api.delete(`/api/gigs/${gigId}`);
+      if (!data.success) throw new Error(data.message || 'Failed to delete project');
       setSuccessMsg('Project deleted successfully.');
       await fetchClientData();
     } catch (err) {
@@ -460,15 +425,9 @@ export default function ClientDashboard() {
     setSuccessMsg('');
     try {
       setActionLoadingId(proposalId);
-      const res = await fetch(`${BASE}/api/proposals/${proposalId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ status })
-      });
+      const data = await api.put(`/api/proposals/${proposalId}`, { status });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.message || `Failed to ${status} proposal`);
       }
 
@@ -490,12 +449,8 @@ export default function ClientDashboard() {
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      const res = await fetch(`${BASE}/api/gigs/${gigId}/milestones/${milestoneId}/approve`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      const data = await api.put(`/api/gigs/${gigId}/milestones/${milestoneId}/approve`);
+      if (!data.success) {
         throw new Error(data.message || 'Failed to approve milestone deliverable');
       }
       setSuccessMsg('Milestone approved and demo payment released.');
@@ -527,14 +482,8 @@ export default function ClientDashboard() {
     setRevisionError('');
     try {
       const { gigId, milestone } = selectedMilestoneForRevision;
-      const res = await fetch(`${BASE}/api/gigs/${gigId}/milestones/${milestone._id}/revision`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ feedback: revisionFeedback.trim() })
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
+      const data = await api.put(`/api/gigs/${gigId}/milestones/${milestone._id}/revision`, { feedback: revisionFeedback.trim() });
+      if (!data.success) {
         throw new Error(data.message || 'Failed to request revision');
       }
       setRevisionModalOpen(false);

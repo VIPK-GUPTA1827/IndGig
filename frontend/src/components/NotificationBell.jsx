@@ -1,6 +1,7 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import { API_BASE } from '../utils/apiBase';
 import { 
   Bell, 
   Check, 
@@ -29,11 +30,8 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BASE}/api/notifications`, {
-        credentials: 'include'
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await api.get('/api/notifications');
+      if (data && data.success) {
         setNotifications(data.data || []);
       }
     } catch (err) {
@@ -84,10 +82,7 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
   const handleNotificationClick = async (notif) => {
     try {
       if (!notif.read) {
-        await fetch(`${BASE}/api/notifications/mark-read/${notif._id}`, {
-          method: 'PUT',
-          credentials: 'include'
-        });
+        await api.put(`/api/notifications/mark-read/${notif._id}`);
         setNotifications(prev =>
           prev.map(n => n._id === notif._id ? { ...n, read: true } : n)
         );
@@ -119,10 +114,7 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
   // Mark all as read
   const handleMarkAllRead = async () => {
     try {
-      await fetch(`${BASE}/api/notifications/mark-read`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
+      await api.put('/api/notifications/mark-read');
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       console.error('Error marking all notifications read:', err);

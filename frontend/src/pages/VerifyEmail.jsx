@@ -1,11 +1,9 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 import Seo from '../components/Seo';
-
-const BASE = API_BASE;
 
 export default function VerifyEmail() {
   const { token } = useParams();
@@ -20,6 +18,7 @@ export default function VerifyEmail() {
 
   // Prevent duplicate execution caused by React 18/19 StrictMode in development
   const hasRequested = useRef(false);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     if (hasRequested.current) return;
@@ -34,14 +33,9 @@ export default function VerifyEmail() {
       }
 
       try {
-        const res = await fetch(`${BASE}/api/auth/verify-email/${token}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include'
-        });
+        const data = await api.get(`/api/auth/verify-email/${token}`);
 
-        const data = await res.json();
-        if (res.ok && data.success) {
+        if (data && data.success) {
           setError('');
           setSuccess(true);
           setAlreadyVerified(Boolean(data.alreadyVerified));
@@ -54,23 +48,28 @@ export default function VerifyEmail() {
           }
 
           // Auto-redirect to dashboard after 2 seconds
-          setTimeout(() => {
+          timerRef.current = setTimeout(() => {
             const role = data.user?.role || 'client';
             navigate(role === 'freelancer' ? '/freelancer/dashboard' : '/client/dashboard');
           }, 2000);
         } else {
           setSuccess(false);
-          setError(data.message || 'Verification link is invalid or expired.');
+          setError(data?.message || 'Verification link is invalid or expired.');
         }
       } catch (err) {
         setSuccess(false);
-        setError(err.message || 'Network error verifying email.');
+        const d = err.response?.data || err.data;
+        setError(d?.message || err.message || 'Network error verifying email.');
       } finally {
         setLoading(false);
       }
     };
 
     verifyToken();
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, [token, updateUser, navigate]);
 
   const handleContinue = () => {
