@@ -2,12 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
 const { sha256, sendAuthTokens, clearAuthCookies } = require('../utils/tokens');
 const EmailLog = require('../models/EmailLog');
-const { protect, authorize, requireVerifiedEmail, optionalAuth } = require('../middleware/auth');
+const { protect, protectSession, authorize, requireVerifiedEmail, optionalAuth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { registerSchema, loginSchema } = require('../validators/auth');
 const { getTransporter } = require('../utils/mailer');
@@ -23,7 +24,7 @@ const router = express.Router();
 // Rate limiter for auth endpoints: login & password reset
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: process.env.NODE_ENV === 'test-rate-limit' ? 3 : 20,
+    max: process.env.NODE_ENV === 'test-rate-limit' ? 3 : (process.env.NODE_ENV === 'production' ? 20 : 1000),
     standardHeaders: true,
     legacyHeaders: false,
     statusCode: 429,
@@ -342,7 +343,9 @@ router.post('/register', authLimiter, validate({ body: registerSchema }), async 
             emailVerificationSentAt: new Date()
         });
 
-        const tokens = await sendAuthTokens(req, res, user);
+        // Pending signup is not an authenticated workspace session.
+        const tokens = user.isEmailVerified ? await sendAuthTokens(req, res, user) : {};
+        if (!user.isEmailVerified) clearAuthCookies(res);
 
         // Verification mail background me (response nahi rukta)
         if (!user.isEmailVerified) {
@@ -542,6 +545,125 @@ router.post('/google', async (req, res) => {
     }
 });
 
+// @desc    Authenticate with GitHub OAuth
+// @route   POST /api/auth/github
+// @access  Public
+router.post('/github', async (req, res) => {
+    try {
+        const { code, role = 'freelancer' } = req.body;
+        if (!code) {
+            return res.status(400).json({ success: false, message: 'Authorization code is required' });
+        }
+
+        const clientId = process.env.GITHUB_CLIENT_ID;
+        const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+        if (!clientId || !clientSecret) {
+            return res.status(500).json({ success: false, message: 'GitHub OAuth not configured on server' });
+        }
+
+        // 1. Exchange code for access_token with GitHub
+        const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+            },
+            body: JSON.stringify({
+                client_id: clientId,
+                client_secret: clientSecret,
+                code
+            })
+        });
+
+        const tokenData = await tokenRes.json();
+        if (tokenData.error || !tokenData.access_token) {
+            console.error('GitHub token exchange error response:', tokenData);
+            return res.status(400).json({
+                success: false,
+                message: tokenData.error_description || 'Failed to exchange GitHub authorization code'
+            });
+        }
+
+        const accessToken = tokenData.access_token;
+
+        // 2. Fetch User Profile from GitHub
+        const userRes = await fetch('https://api.github.com/user', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'User-Agent': 'IndGig-OAuth-App'
+            }
+        });
+        const ghProfile = await userRes.json();
+
+        // 3. Fetch User Emails (to ensure primary verified email)
+        const emailsRes = await fetch('https://api.github.com/user/emails', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'User-Agent': 'IndGig-OAuth-App'
+            }
+        });
+        const emailsData = await emailsRes.json();
+        let primaryEmail = ghProfile.email;
+        if (Array.isArray(emailsData)) {
+            const primary = emailsData.find(e => e.primary && e.verified) || emailsData.find(e => e.verified) || emailsData[0];
+            if (primary) primaryEmail = primary.email;
+        }
+
+        if (!primaryEmail) {
+            return res.status(400).json({
+                success: false,
+                message: 'No verified public or private email accessible from your GitHub profile.'
+            });
+        }
+
+        primaryEmail = primaryEmail.toLowerCase().trim();
+        const githubId = String(ghProfile.id);
+        const name = ghProfile.name || ghProfile.login || 'GitHub Developer';
+        const avatar = ghProfile.avatar_url || '';
+
+        // 4. Find or Create User
+        let user = await User.findOne({
+            $or: [{ githubId }, { email: primaryEmail }]
+        });
+
+        if (user) {
+            if (!user.githubId) user.githubId = githubId;
+            if (!user.isEmailVerified) user.isEmailVerified = true;
+            if (!user.avatar && avatar) user.avatar = avatar;
+            if (user.authProvider === 'local') user.authProvider = 'github';
+            await user.save();
+        } else {
+            const assignedRole = role === 'client' ? 'client' : 'freelancer';
+            const baseUsername = (ghProfile.login || primaryEmail.split('@')[0]).toLowerCase().replace(/[^a-z0-9]/g, '_');
+            const displayUsername = `${baseUsername}_${Math.floor(1000 + Math.random() * 9000)}`;
+
+            user = await User.create({
+                name,
+                username: displayUsername,
+                email: primaryEmail,
+                githubId,
+                authProvider: 'github',
+                avatar,
+                role: assignedRole,
+                isEmailVerified: true
+            });
+        }
+
+        // 5. Issue session tokens
+        const tokens = await sendAuthTokens(req, res, user);
+
+        return res.json({
+            success: true,
+            message: 'GitHub login successful!',
+            ...tokens,
+            user: formatUserResponse(user)
+        });
+    } catch (error) {
+        console.error('GitHub OAuth error:', error);
+        res.status(500).json({ success: false, message: 'Server error during GitHub authentication' });
+    }
+});
+
 // @desc    Refresh access token
 // @route   POST /api/auth/refresh
 // @access  Public
@@ -569,7 +691,7 @@ router.post('/refresh', async (req, res) => {
     }
 
     const user = await User.findById(stored.user);
-    if (!user || user.isSuspended) {
+    if (!user || !user.isEmailVerified || user.isSuspended || (stored.tokenVersion || 0) !== (user.tokenVersion || 0)) {
         clearAuthCookies(res);
         return res.status(401).json({
             success: false,
@@ -596,7 +718,7 @@ router.post('/logout', async (req, res) => {
 // @desc    Logout from all devices
 // @route   POST /api/auth/logout-all
 // @access  Private
-router.post('/logout-all', protect, async (req, res) => {
+router.post('/logout-all', protectSession, async (req, res) => {
     await RefreshToken.deleteMany({ user: req.user._id });
     await User.updateOne({ _id: req.user._id }, { $inc: { tokenVersion: 1 } });
     clearAuthCookies(res);
@@ -837,13 +959,16 @@ router.put('/reset-password/:token', authLimiter, async (req, res) => {
             });
         }
 
-        // Set new password (pre-save hook will hash it with bcrypt)
-        user.password = password;
-        // Invalidate token immediately (one-time use)
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        user.tokenVersion = (user.tokenVersion || 0) + 1;
-        await user.save();
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const changed = await User.findOneAndUpdate({
+            _id: user._id, resetPasswordToken: hashedToken,
+            resetPasswordExpire: { $gt: new Date() }
+        }, {
+            $set: { password: hashedPassword },
+            $unset: { resetPasswordToken: 1, resetPasswordExpire: 1 },
+            $inc: { tokenVersion: 1 }
+        }, { returnDocument: 'after' });
+        if (!changed) return fail(res, 400, 'Invalid or expired password reset link. Please request a new one.');
         await RefreshToken.deleteMany({ user: user._id });
 
         res.status(200).json({

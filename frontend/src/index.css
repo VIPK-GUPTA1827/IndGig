@@ -71,6 +71,17 @@ html {
   scrollbar-width: none;
 }
 
+/* Hide native Edge/IE/Chrome password reveal icon to prevent double eye icon */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+input::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, ::before, ::after {

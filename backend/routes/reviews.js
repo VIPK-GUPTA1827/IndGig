@@ -12,7 +12,7 @@ const router = express.Router();
 // @desc    Submit a review for a completed gig
 // @route   POST /api/reviews
 // @access  Private
-router.post('/', protect, requireVerifiedEmail, reviewLimiter, async (req, res) => {
+router.post('/', protect, requireVerifiedEmail, reviewLimiter, async (req, res, next) => {
   try {
     const { gig: gigId, reviewee, rating, comment } = req.body;
 
@@ -94,14 +94,14 @@ router.post('/', protect, requireVerifiedEmail, reviewLimiter, async (req, res) 
 
     res.status(201).json({ success: true, data: review });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Get reviews and rating stats for a user
 // @route   GET /api/reviews/user/:userId
 // @access  Public
-router.get('/user/:userId', async (req, res) => {
+router.get('/user/:userId', async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
       return res.status(400).json({ success: false, message: 'Invalid user ID format' });
@@ -128,14 +128,14 @@ router.get('/user/:userId', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Check if logged-in user has submitted a review for a gig
 // @route   GET /api/reviews/gig/:gigId/mine
 // @access  Private
-router.get('/gig/:gigId/mine', protect, async (req, res) => {
+router.get('/gig/:gigId/mine', protect, async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.gigId)) {
       return res.status(400).json({ success: false, message: 'Invalid gig ID format' });
@@ -147,7 +147,7 @@ router.get('/gig/:gigId/mine', protect, async (req, res) => {
     });
     res.status(200).json({ success: true, reviewed: !!review });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 

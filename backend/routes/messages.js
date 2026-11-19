@@ -10,7 +10,7 @@ const router = express.Router();
 // @desc    Get message history between logged-in user and another user (cursor paginated)
 // @route   GET /api/messages/:userId
 // @access  Private
-router.get('/:userId', protect, async (req, res) => {
+router.get('/:userId', protect, async (req, res, next) => {
   try {
     const currentUserId = req.user._id;
     const chatPartnerId = req.params.userId;
@@ -52,14 +52,14 @@ router.get('/:userId', protect, async (req, res) => {
       data: messages
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Get list of contacts the user has conversed with
 // @route   GET /api/messages/chats/contacts
 // @access  Private
-router.get('/chats/contacts', protect, async (req, res) => {
+router.get('/chats/contacts', protect, async (req, res, next) => {
   try {
     const currentId = new mongoose.Types.ObjectId(req.user._id);
 
@@ -134,14 +134,14 @@ router.get('/chats/contacts', protect, async (req, res) => {
 
     res.status(200).json({ success: true, count: contactsList.length, data: contactsList });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Mark all messages from a specific sender to current user as read
 // @route   PUT /api/messages/mark-read/:senderId
 // @access  Private
-router.put('/mark-read/:senderId', protect, messageLimiter, async (req, res) => {
+router.put('/mark-read/:senderId', protect, messageLimiter, async (req, res, next) => {
   try {
     const currentUserId = req.user._id;
     const senderId = req.params.senderId;
@@ -161,7 +161,7 @@ router.put('/mark-read/:senderId', protect, messageLimiter, async (req, res) => 
       modifiedCount: result.modifiedCount 
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 

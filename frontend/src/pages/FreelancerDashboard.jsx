@@ -1,3 +1,4 @@
+import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -41,7 +42,7 @@ const getGreeting = () => {
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const BASE = import.meta.env.VITE_API_URL || '';
+const BASE = API_BASE;
 
 export default function FreelancerDashboard() {
   const { user, logout, switchRole, loading, updateUser } = useAuth();

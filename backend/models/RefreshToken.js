@@ -15,6 +15,7 @@ const refreshTokenSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  tokenVersion: { type: Number, default: 0 },
   userAgent: {
     type: String,
     default: ''

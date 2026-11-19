@@ -17,6 +17,10 @@ export default function ProtectedRoute({ children, role }) {
     return <Navigate to="/login" replace />;
   }
 
+  if (!user.isEmailVerified) {
+    return <Navigate to={`/check-email?email=${encodeURIComponent(user.email || '')}`} replace />;
+  }
+
   if (role && user.role !== role && user.role !== 'admin') {
     return <Navigate to={user.role === 'client' ? '/client/dashboard' : '/freelancer/dashboard'} replace />;
   }

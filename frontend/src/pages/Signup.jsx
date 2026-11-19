@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft, ShieldCheck, Zap, Lock } from 'lucide-react';
 import PasswordStrengthMeter, { evaluatePassword } from '../components/PasswordStrengthMeter';
 import GoogleAuthButton from '../components/GoogleAuthButton';
+import GitHubAuthButton from '../components/GitHubAuthButton';
 import Seo from '../components/Seo';
 
 export default function Signup() {
@@ -33,7 +34,6 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
-  const [suggestion, setSuggestion] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleNameChange = (e) => {
@@ -45,7 +45,6 @@ export default function Signup() {
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => ({ ...prev, [field]: '' }));
-    if (field === 'email') setSuggestion('');
   };
 
   const handleSubmit = async (e) => {
@@ -75,7 +74,6 @@ export default function Signup() {
     }
 
     setSubmitting(true);
-    setSuggestion('');
     try {
       const data = await register({
         name: formData.name.trim(),
@@ -98,7 +96,6 @@ export default function Signup() {
     } catch (err) {
       const d = err.response?.data || err.data;
       setError(d?.message || err.message || 'Registration failed. Please try again.');
-      setSuggestion(d?.suggestion || '');
       if (Array.isArray(d?.errors)) {
         const fMap = {};
         d.errors.forEach((item) => {
@@ -191,13 +188,17 @@ export default function Signup() {
             </div>
           )}
 
-          {/* 1-Click Google OAuth */}
-          <div className="mb-6">
+          {/* 1-Click OAuth Options (Google + GitHub) */}
+          <div className="space-y-2.5 mb-6">
             <GoogleAuthButton 
               role={role}
               isSignup={true}
               text="Continue with Google" 
               onError={(msg) => setError(msg)} 
+            />
+            <GitHubAuthButton
+              role={role}
+              text="Continue with GitHub"
             />
           </div>
 
@@ -274,24 +275,6 @@ export default function Signup() {
               />
               {fieldErrors.email && (
                 <p className="text-[11px] font-semibold text-rose-600 mt-1">{fieldErrors.email}</p>
-              )}
-
-              {suggestion && (
-                <div className="mt-2 p-2.5 rounded-xl bg-accent-tint border border-accent-soft/90 text-xs text-purple-900 flex items-center justify-between gap-2 animate-in fade-in">
-                  <span>Did you mean <b>{suggestion}</b>?</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(prev => ({ ...prev, email: suggestion }));
-                      setSuggestion('');
-                      setError('');
-                      setFieldErrors(prev => ({ ...prev, email: '' }));
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-accent-text text-white font-bold hover:bg-accent-deep transition-colors cursor-pointer text-xs"
-                  >
-                    Use {suggestion}
-                  </button>
-                </div>
               )}
             </div>
 

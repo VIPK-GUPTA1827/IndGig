@@ -1,3 +1,4 @@
+import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -36,7 +37,7 @@ const POPULAR_SKILLS = [
   'UI/UX Design', 'SQL', 'Docker', 'Machine Learning'
 ];
 
-const BASE = import.meta.env.VITE_API_URL || '';
+const BASE = API_BASE;
 
 const FreelancerSetupWizard = () => {
   const { user, loading, updateUser } = useAuth();
@@ -270,7 +271,10 @@ const FreelancerSetupWizard = () => {
       <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
+            <div className="w-8 h-8 rounded-xl bg-[#030B3D] text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition-transform">
+              G
+            </div>
+            <span className="font-extrabold text-lg text-[#030B3D] tracking-tight">IndGig</span>
           </Link>
 
           <div className="flex items-center gap-4">

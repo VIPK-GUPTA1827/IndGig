@@ -17,7 +17,7 @@ const router = express.Router();
 // @desc    File a new dispute on a contract gig
 // @route   POST /api/disputes
 // @access  Private
-router.post('/', protect, requireVerifiedEmail, disputeLimiter, async (req, res) => {
+router.post('/', protect, requireVerifiedEmail, disputeLimiter, async (req, res, next) => {
     try {
         const { gigId, reason, explanation, evidenceFile } = req.body;
 
@@ -29,46 +29,32 @@ router.post('/', protect, requireVerifiedEmail, disputeLimiter, async (req, res)
             return res.status(400).json({ success: false, message: 'Invalid gig ID format' });
         }
 
-        const gig = await Gig.findById(gigId);
-        if (!gig) {
-            return res.status(404).json({ success: false, message: 'Gig not found' });
+        if (!Dispute.schema.path('reason').enumValues.includes(reason) ||
+            typeof explanation !== 'string' || explanation.trim().length < 10 || explanation.length > 1000 ||
+            (evidenceFile !== undefined && (typeof evidenceFile !== 'string' || evidenceFile.length > 1000))) {
+            throw new AppError('Invalid dispute details', 400);
         }
-
-        // Verify user is either client or freelancer on this gig
-        const isClient = gig.client.toString() === req.user._id.toString();
-        const isFreelancer = gig.freelancer && gig.freelancer.toString() === req.user._id.toString();
-
-        if (!isClient && !isFreelancer && req.user.role !== 'admin') {
-            return res.status(401).json({ success: false, message: 'Not authorized to file a dispute on this contract' });
-        }
-
-        // Check for active escrow
-        const escrow = await Escrow.findOne({ gig: gigId, status: { $in: ['held', 'partially-released'] } });
-        if (!escrow) {
-            return res.status(400).json({ success: false, message: 'No active locked escrow found for this gig contract' });
-        }
-
-        // Check if there is already an open dispute
-        const existingDispute = await Dispute.findOne({ gig: gigId, status: 'open' });
-        if (existingDispute) {
-            return res.status(400).json({ success: false, message: 'A dispute is already open for this gig contract' });
-        }
-
-        const opponent = isClient ? gig.freelancer : gig.client;
-
-        const dispute = await Dispute.create({
-            gig: gigId,
-            escrow: escrow._id,
-            initiator: req.user._id,
-            opponent,
-            reason,
-            explanation,
-            evidenceFile: evidenceFile || ''
+        const { gig, dispute, opponent } = await withTransaction(async session => {
+            const current = await Gig.findById(gigId).session(session);
+            if (!current) throw new AppError('Gig not found', 404);
+            const isClient = current.client.toString() === req.user._id.toString();
+            const isFreelancer = current.freelancer?.toString() === req.user._id.toString();
+            if (!isClient && !isFreelancer && req.user.role !== 'admin') throw new AppError('Not authorized to file this dispute', 403);
+            if (current.status !== 'in-progress') throw new AppError('Contract is not active or is already disputed', 409);
+            const gig = await Gig.findOneAndUpdate(
+                { _id: gigId, status: 'in-progress' }, { $set: { status: 'disputed' } },
+                { session, returnDocument: 'after' }
+            );
+            if (!gig) throw new AppError('Contract changed, reload before retrying', 409);
+            const escrow = await Escrow.findOne({ gig: gigId, status: { $in: ['held', 'partially-released'] } }).session(session);
+            if (!escrow) throw new AppError('No active locked escrow found for this contract', 409);
+            const opponent = isClient ? gig.freelancer : gig.client;
+            const [dispute] = await Dispute.create([{
+                gig: gigId, escrow: escrow._id, initiator: req.user._id, opponent,
+                reason, explanation: explanation.trim(), evidenceFile: evidenceFile || ''
+            }], { session });
+            return { gig, dispute, opponent };
         });
-
-        // Lock gig status to disputed
-        gig.status = 'disputed';
-        await gig.save();
 
         // Notify Opponent
         try {
@@ -87,14 +73,14 @@ router.post('/', protect, requireVerifiedEmail, disputeLimiter, async (req, res)
 
         res.status(201).json({ success: true, message: 'Dispute filed successfully. Contract has been frozen.', data: dispute });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get all disputes
 // @route   GET /api/disputes
 // @access  Private (Admin only)
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Only admins can view disputes list' });
@@ -109,14 +95,14 @@ router.get('/', protect, async (req, res) => {
 
         res.status(200).json({ success: true, count: disputes.length, data: disputes });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Resolve dispute with refund or payout release
 // @route   PUT /api/disputes/:id/resolve
 // @access  Private (Admin only)
-router.put('/:id/resolve', protect, authorize('admin'), async (req, res) => {
+router.put('/:id/resolve', protect, authorize('admin'), async (req, res, next) => {
     const { resolution } = req.body;
     const valid = ['refund_client', 'release_freelancer'];
     if (!valid.includes(resolution)) {

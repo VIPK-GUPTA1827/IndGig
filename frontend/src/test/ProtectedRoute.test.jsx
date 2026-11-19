@@ -52,7 +52,7 @@ describe('ProtectedRoute component', () => {
 
   it('redirects user with role mismatch to their workspace dashboard', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
-      user: { _id: 'u1', role: 'client' },
+      user: { _id: 'u1', role: 'client', isEmailVerified: true },
       loading: false
     });
 
@@ -78,7 +78,7 @@ describe('ProtectedRoute component', () => {
 
   it('renders children when authenticated with matching role', () => {
     vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({
-      user: { _id: 'u2', role: 'freelancer' },
+      user: { _id: 'u2', role: 'freelancer', isEmailVerified: true },
       loading: false
     });
 
@@ -92,4 +92,14 @@ describe('ProtectedRoute component', () => {
 
     expect(screen.getByText('Freelancer Job Board')).toBeInTheDocument();
   });
+});
+
+it('redirects an unverified authenticated account to email verification', () => {
+  vi.spyOn(AuthContextModule, 'useAuth').mockReturnValue({ user: { _id: 'pending', role: 'client', email: 'local@example.com', isEmailVerified: false }, loading: false });
+  render(<MemoryRouter initialEntries={['/dashboard']}><Routes>
+    <Route path="/dashboard" element={<ProtectedRoute><div>Private dashboard</div></ProtectedRoute>} />
+    <Route path="/check-email" element={<div>Verify Email Page</div>} />
+  </Routes></MemoryRouter>);
+  expect(screen.getByText('Verify Email Page')).toBeInTheDocument();
+  expect(screen.queryByText('Private dashboard')).not.toBeInTheDocument();
 });

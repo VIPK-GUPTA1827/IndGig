@@ -2,6 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const withTransaction = require('../utils/withTransaction');
+const AppError = require('../utils/AppError');
+const { timeRange, bookingDate: parseBookingDate } = require('../utils/bookingValidation');
 const { protect, authorize, requireVerifiedEmail } = require('../middleware/auth');
 const { sendNotification } = require('../utils/notifications');
 
@@ -10,7 +13,7 @@ const router = express.Router();
 // @desc    Update freelancer's availability slots
 // @route   PUT /api/bookings/availability
 // @access  Private (Freelancers only with verified email)
-router.put('/availability', protect, authorize('freelancer', 'admin'), requireVerifiedEmail, async (req, res) => {
+router.put('/availability', protect, authorize('freelancer', 'admin'), requireVerifiedEmail, async (req, res, next) => {
     try {
         if (req.user.role !== 'freelancer' && req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Only freelancers can update availability slots' });
@@ -22,42 +25,36 @@ router.put('/availability', protect, authorize('freelancer', 'admin'), requireVe
             return res.status(400).json({ success: false, message: 'Please provide an array of availability slots' });
         }
 
-        // Validate slots structure
         const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/; // HH:MM
-
-        for (const slot of slots) {
-            if (!validDays.includes(slot.dayOfWeek)) {
-                return res.status(400).json({ success: false, message: `Invalid day of week: ${slot.dayOfWeek}` });
-            }
-            if (!timeRegex.test(slot.startTime) || !timeRegex.test(slot.endTime)) {
-                return res.status(400).json({ success: false, message: 'Time slots must be in 24-hour HH:MM format' });
-            }
-            if (slot.startTime >= slot.endTime) {
-                return res.status(400).json({ success: false, message: 'Start time must be before end time' });
-            }
-        }
+        if (slots.length > 100) throw new AppError('Maximum 100 availability slots', 400);
+        const normalized = slots.map(slot => {
+            if (!slot || !validDays.includes(slot.dayOfWeek)) throw new AppError('Invalid day of week', 400);
+            return { dayOfWeek: slot.dayOfWeek, ...timeRange(slot.startTime, slot.endTime) };
+        });
 
         const user = await User.findById(req.user._id);
-        user.availabilitySlots = slots;
+        user.availabilitySlots = normalized;
         await user.save();
 
         res.status(200).json({ success: true, message: 'Availability slots updated successfully', data: user.availabilitySlots });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Create a new booking reservation slot
 // @route   POST /api/bookings
 // @access  Private (Clients only with verified email)
-router.post('/', protect, authorize('client', 'admin'), requireVerifiedEmail, async (req, res) => {
+router.post('/', protect, authorize('client', 'admin'), requireVerifiedEmail, async (req, res, next) => {
     try {
         if (req.user.role !== 'client' && req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Only clients can request bookings' });
         }
 
-        const { freelancerId, date, startTime, endTime, description } = req.body;
+        const { freelancerId, date, startTime: start, endTime: end, description } = req.body;
+        const { startTime, endTime } = timeRange(start, end);
+        const bookingDate = parseBookingDate(date);
+        if (typeof description !== 'string' || !description.trim() || description.length > 300) throw new AppError('Description must contain 1 to 300 characters', 400);
 
         if (!freelancerId || !date || !startTime || !endTime || !description) {
             return res.status(400).json({ success: false, message: 'Please provide all booking details (freelancerId, date, startTime, endTime, description)' });
@@ -71,40 +68,29 @@ router.post('/', protect, authorize('client', 'admin'), requireVerifiedEmail, as
             return res.status(400).json({ success: false, message: 'You cannot book a session with yourself' });
         }
 
-        // Validate freelancer exists
-        const freelancer = await User.findById(freelancerId);
-        if (!freelancer || freelancer.role !== 'freelancer') {
-            return res.status(404).json({ success: false, message: 'Freelancer not found' });
-        }
-
-        const bookingDate = new Date(date);
-        // Reset time to midnight for consistent date comparison
-        bookingDate.setUTCHours(0, 0, 0, 0);
-
-        // Check for time slot conflicts
-        // Find existing bookings on the same date for this freelancer that are either pending or confirmed
-        const existingBookings = await Booking.find({
-            freelancer: freelancerId,
-            date: bookingDate,
-            status: { $in: ['pending', 'confirmed'] }
-        });
-
-        // Time overlap check: start1 < end2 && end1 > start2
-        const hasConflict = existingBookings.some(b => {
-            return startTime < b.endTime && endTime > b.startTime;
-        });
-
-        if (hasConflict) {
-            return res.status(400).json({ success: false, message: 'This time slot is already booked or requested on this date.' });
-        }
-
-        const booking = await Booking.create({
-            freelancer: freelancerId,
-            client: req.user._id,
-            date: bookingDate,
-            startTime,
-            endTime,
-            description
+        const booking = await withTransaction(async session => {
+            // Serialize reservations for this freelancer across every API process.
+            // A retry sees the booking committed by the winner before checking overlap.
+            const freelancer = await User.findOneAndUpdate(
+                { _id: freelancerId, role: 'freelancer', isSuspended: { $ne: true } },
+                { $inc: { bookingRevision: 1 } },
+                { session, returnDocument: 'after' }
+            );
+            if (!freelancer) throw new AppError('Freelancer not found', 404);
+            const existing = await Booking.find({
+                freelancer: freelancerId, date: bookingDate,
+                status: { $in: ['pending', 'confirmed'] }
+            }).session(session);
+            const conflict = existing.some(b => {
+                const range = timeRange(b.startTime, b.endTime);
+                return startTime < range.endTime && endTime > range.startTime;
+            });
+            if (conflict) throw new AppError('This time slot is already booked or requested on this date.', 409);
+            const [created] = await Booking.create([{
+                freelancer: freelancerId, client: req.user._id, date: bookingDate,
+                startTime, endTime, description: description.trim()
+            }], { session });
+            return created;
         });
 
         // Notify Freelancer
@@ -124,14 +110,14 @@ router.post('/', protect, authorize('client', 'admin'), requireVerifiedEmail, as
 
         res.status(201).json({ success: true, message: 'Booking requested successfully', data: booking });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get bookings of the logged-in user
 // @route   GET /api/bookings/my-bookings
 // @access  Private
-router.get('/my-bookings', protect, async (req, res) => {
+router.get('/my-bookings', protect, async (req, res, next) => {
     try {
         let bookings;
 
@@ -153,14 +139,14 @@ router.get('/my-bookings', protect, async (req, res) => {
 
         res.status(200).json({ success: true, count: bookings.length, data: bookings });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Update booking reservation status (Accept/Reject/Cancel/Complete)
 // @route   PUT /api/bookings/:id/status
 // @access  Private
-router.put('/:id/status', protect, async (req, res) => {
+router.put('/:id/status', protect, async (req, res, next) => {
     try {
         const { status } = req.body;
 
@@ -197,8 +183,12 @@ router.put('/:id/status', protect, async (req, res) => {
             }
         }
 
-        booking.status = status;
-        await booking.save();
+        const claimed = await Booking.findOneAndUpdate(
+            { _id: booking._id, status: booking.status },
+            { $set: { status } }, { returnDocument: 'after', runValidators: true }
+        );
+        if (!claimed) throw new AppError('Booking changed, reload before retrying', 409);
+        booking.status = claimed.status;
 
         // Send real-time notification to the relevant parties
         try {
@@ -228,7 +218,7 @@ router.put('/:id/status', protect, async (req, res) => {
 
         res.status(200).json({ success: true, message: `Booking status updated to ${status}`, data: booking });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 

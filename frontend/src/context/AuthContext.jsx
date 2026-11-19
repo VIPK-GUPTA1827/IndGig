@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }) => {
   const register = async ({ name, username, email, password, role }) => {
     const data = await api.post('/api/auth/register', { name, username, email, password, role });
     if (data.requiresVerification) {
+      setUser(null);
       localStorage.setItem('pendingEmail', email);
     } else if (data.user) {
       setUser(data.user);

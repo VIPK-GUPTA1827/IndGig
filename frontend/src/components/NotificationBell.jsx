@@ -1,3 +1,4 @@
+import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 import io from 'socket.io-client';
 
-const BASE = import.meta.env.VITE_API_URL || '';
+const BASE = API_BASE;
 
 export default function NotificationBell({ userRole = 'freelancer', onNavigateToGig }) {
   const [notifications, setNotifications] = useState([]);
@@ -45,7 +46,7 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
   useEffect(() => {
     fetchNotifications();
 
-    const SOCKET_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:5000' : '');
+    const SOCKET_URL = API_BASE || (import.meta.env.DEV ? 'http://127.0.0.1:5000' : '');
     if (!SOCKET_URL) return;
 
     // Listen for real-time socket events

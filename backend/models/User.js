@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: function () {
-            return !this.googleId;
+            return !this.googleId && !this.githubId;
         },
         minlength: [12, 'Password must be at least 12 characters']
     },
@@ -32,9 +32,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    githubId: {
+        type: String,
+        default: null
+    },
     authProvider: {
         type: String,
-        enum: ['local', 'google'],
+        enum: ['local', 'google', 'github'],
         default: 'local'
     },
     avatar: {
@@ -55,6 +59,7 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    bookingRevision: { type: Number, default: 0, select: false },
     walletBalance: {
         type: Number,
         default: function() {

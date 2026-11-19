@@ -27,7 +27,7 @@ const adminOnly = (req, res, next) => {
 // @desc    Get dashboard statistics for Admin
 // @route   GET /api/admin/stats
 // @access  Private (Admin Only)
-router.get('/stats', protect, adminOnly, async (req, res) => {
+router.get('/stats', protect, adminOnly, async (req, res, next) => {
     try {
         // User counts
         const totalUsers = await User.countDocuments({});
@@ -87,26 +87,26 @@ router.get('/stats', protect, adminOnly, async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get list of all users
 // @route   GET /api/admin/users
 // @access  Private (Admin Only)
-router.get('/users', protect, adminOnly, async (req, res) => {
+router.get('/users', protect, adminOnly, async (req, res, next) => {
     try {
         const users = await User.find({}).select(SAFE_USER_SELECT).sort({ createdAt: -1 });
         res.status(200).json({ success: true, count: users.length, data: users });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Toggle Verification Badge of a user
 // @route   PUT /api/admin/users/:id/verify
 // @access  Private (Admin Only)
-router.put('/users/:id/verify', protect, adminOnly, async (req, res) => {
+router.put('/users/:id/verify', protect, adminOnly, async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, message: 'Invalid user ID format' });
@@ -127,14 +127,14 @@ router.put('/users/:id/verify', protect, adminOnly, async (req, res) => {
             data: { _id: user._id, verificationBadge: user.verificationBadge }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Toggle user suspension status
 // @route   PUT /api/admin/users/:id/suspend
 // @access  Private (Admin Only)
-router.put('/users/:id/suspend', protect, adminOnly, async (req, res) => {
+router.put('/users/:id/suspend', protect, adminOnly, async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, message: 'Invalid user ID format' });
@@ -165,14 +165,14 @@ router.put('/users/:id/suspend', protect, adminOnly, async (req, res) => {
             data: { _id: user._id, isSuspended: user.isSuspended }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get all gigs in system
 // @route   GET /api/admin/gigs
 // @access  Private (Admin Only)
-router.get('/gigs', protect, adminOnly, async (req, res) => {
+router.get('/gigs', protect, adminOnly, async (req, res, next) => {
     try {
         const gigs = await Gig.find({})
             .populate('client', 'username email')
@@ -181,14 +181,14 @@ router.get('/gigs', protect, adminOnly, async (req, res) => {
 
         res.status(200).json({ success: true, count: gigs.length, data: gigs });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get all escrows and transaction ledger for payment auditing
 // @route   GET /api/admin/payments
 // @access  Private (Admin Only)
-router.get('/payments', protect, adminOnly, async (req, res) => {
+router.get('/payments', protect, adminOnly, async (req, res, next) => {
     try {
         const escrows = await Escrow.find({})
             .populate('gig', 'title status budget')
@@ -208,7 +208,7 @@ router.get('/payments', protect, adminOnly, async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 

@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || '';
+import { API_BASE } from './apiBase';
+const BASE = API_BASE;
 
 const NO_REFRESH_PATHS = [
   '/api/auth/refresh',

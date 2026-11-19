@@ -17,9 +17,13 @@ app.set('io', io);
 
 async function start() {
   await connectDB(); // Connect to MongoDB first, then start server
-  server.listen(PORT, () =>
-    console.log(`Server running on port ${PORT}`)
-  );
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    // Notify PM2 that this cluster worker is online and ready for traffic
+    if (process.send) {
+      process.send('ready');
+    }
+  });
 }
 start();
 

@@ -28,6 +28,7 @@ async function issueRefreshToken(user, req) {
   const raw = crypto.randomBytes(48).toString('hex');
   await RefreshToken.create({
     user: user._id,
+    tokenVersion: user.tokenVersion || 0,
     tokenHash: sha256(raw),
     expiresAt: new Date(Date.now() + REFRESH_MS),
     userAgent: (req.get('user-agent') || '').slice(0, 200)

@@ -9,6 +9,8 @@ const isId = (v) => typeof v === 'string' && mongoose.Types.ObjectId.isValid(v);
 
 function setupSocket(server) {
   const io = socketio(server, {
+    allowRequest: (req, callback) => callback(null, !req.headers.origin || allowedOrigins.includes(req.headers.origin)),
+    maxHttpBufferSize: 100 * 1024,
     cors: {
       origin: allowedOrigins,
       credentials: true,
@@ -27,9 +29,11 @@ function setupSocket(server) {
       const token = socket.handshake.auth?.token || cookieToken;
       if (!token) return next(new Error('Auth required'));
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.id).select('_id role isSuspended tokenVersion');
-      if (!user || user.isSuspended) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+      if (!isId(decoded.id)) return next(new Error('Invalid subject'));
+      socket.accessToken = token;
+      const user = await User.findById(decoded.id).select('_id role isSuspended tokenVersion isEmailVerified');
+      if (!user || !user.isEmailVerified || user.isSuspended) {
         return next(new Error('Not allowed'));
       }
       if ((decoded.v || 0) !== (user.tokenVersion || 0)) {
@@ -46,6 +50,22 @@ function setupSocket(server) {
   io.on('connection', (socket) => {
     const userId = socket.user._id.toString();
     socket.join(userId);
+
+    // Handshake auth is not enough: a long-lived connection must respect logout,
+    // password reset, suspension and access-token expiry on its next event.
+    socket.use(async (_packet, next) => {
+      try {
+        const decoded = jwt.verify(socket.accessToken, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+        const user = await User.findById(userId).select('_id isSuspended tokenVersion isEmailVerified');
+        if (!user || !user.isEmailVerified || user.isSuspended || (decoded.v || 0) !== (user.tokenVersion || 0)) throw new Error('Session ended');
+        next();
+      } catch {
+        socket.emit('session_expired', { message: 'Please log in again' });
+        next(new Error('Session ended'));
+        socket.disconnect(true);
+      }
+    });
+    socket.on('error', () => {});
 
     // Simple limit: 20 events / 10 sec per socket
     let count = 0;

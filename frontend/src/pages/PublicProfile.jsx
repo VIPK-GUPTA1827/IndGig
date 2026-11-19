@@ -1,3 +1,4 @@
+import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -45,7 +46,7 @@ const TwitterIcon = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-const BASE = import.meta.env.VITE_API_URL || '';
+const BASE = API_BASE;
 
 export default function PublicProfile() {
   const { id } = useParams();

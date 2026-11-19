@@ -175,6 +175,7 @@ describe('Auth Endpoints', () => {
     // 1. Silent refresh with valid refreshToken cookie
     const refreshRes = await request(app)
       .post('/api/auth/refresh')
+      .set('Origin', 'http://localhost:3000')
       .set('Cookie', [refreshCookie]);
 
     expect(refreshRes.status).toBe(200);
@@ -184,6 +185,7 @@ describe('Auth Endpoints', () => {
     // 2. Reuse of consumed token must fail (Token Rotation security)
     const reuseRes = await request(app)
       .post('/api/auth/refresh')
+      .set('Origin', 'http://localhost:3000')
       .set('Cookie', [refreshCookie]);
 
     expect(reuseRes.status).toBe(401);

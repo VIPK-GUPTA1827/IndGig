@@ -1,31 +1,15 @@
 // utils/emailCheck.js
-// Signup pe email check: format + typo + disposable domain
+// Strict email check: Only allowed trusted email providers, zero suggestions, zero fake emails
 
-const TYPO_DOMAINS = {
-  'gemail.com': 'gmail.com',
-  'gmial.com': 'gmail.com',
-  'gmai.com': 'gmail.com',
-  'gamil.com': 'gmail.com',
-  'gmail.con': 'gmail.com',
-  'gmail.co': 'gmail.com',
-  'yahooo.com': 'yahoo.com',
-  'yaho.com': 'yahoo.com',
-  'hotmial.com': 'hotmail.com',
-  'hotmal.com': 'hotmail.com',
-  'outlok.com': 'outlook.com',
-  'iclod.com': 'icloud.com'
-};
-
-const DISPOSABLE_DOMAINS = new Set([
-  'mailinator.com',
-  'guerrillamail.com',
-  '10minutemail.com',
-  'tempmail.com',
-  'temp-mail.org',
-  'yopmail.com',
-  'trashmail.com',
-  'sharklasers.com',
-  'throwawaymail.com'
+const ALLOWED_DOMAINS = new Set([
+  'gmail.com',
+  'yahoo.com',
+  'yahoo.in',
+  'outlook.com',
+  'hotmail.com',
+  'icloud.com',
+  'zoho.com',
+  'proton.me'
 ]);
 
 const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -38,23 +22,15 @@ function checkEmail(rawEmail) {
 
   const [localPart, domain] = email.split('@');
 
-  if (TYPO_DOMAINS[domain]) {
-    const suggestion = `${localPart}@${TYPO_DOMAINS[domain]}`;
+  // Strict domain whitelist
+  if (!ALLOWED_DOMAINS.has(domain)) {
     return {
       ok: false,
-      message: `Did you mean ${suggestion}?`,
-      suggestion
-    };
-  }
-
-  if (DISPOSABLE_DOMAINS.has(domain)) {
-    return {
-      ok: false,
-      message: 'Temporary emails are not allowed'
+      message: 'Please use a valid email'
     };
   }
 
   return { ok: true, email };
 }
 
-module.exports = { checkEmail, TYPO_DOMAINS, DISPOSABLE_DOMAINS };
+module.exports = { checkEmail, ALLOWED_DOMAINS };

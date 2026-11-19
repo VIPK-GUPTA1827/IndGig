@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Eye, EyeOff, AlertCircle, Loader2, ArrowLeft, ShieldCheck, Zap, Lock } from 'lucide-react';
 import GoogleAuthButton from '../components/GoogleAuthButton';
+import GitHubAuthButton from '../components/GitHubAuthButton';
 import Seo from '../components/Seo';
 
 export default function Login() {
@@ -142,12 +143,15 @@ export default function Login() {
             </div>
           )}
 
-          {/* 1-Click Google OAuth */}
-          <div className="mb-6">
+          {/* 1-Click OAuth Options (Google + GitHub) */}
+          <div className="space-y-2.5 mb-6">
             <GoogleAuthButton 
               isSignup={false} 
               text="Sign in with Google" 
               onError={(msg) => setError(msg)} 
+            />
+            <GitHubAuthButton
+              text="Sign in with GitHub"
             />
           </div>
 

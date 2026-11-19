@@ -33,7 +33,7 @@ const createProposalLimiter = rateLimit({
 // @desc    Submit a new proposal/bid for a gig
 // @route   POST /api/proposals
 // @access  Private (Freelancers only with verified email)
-router.post('/', createProposalLimiter, protect, authorize('freelancer', 'admin'), requireVerifiedEmail, validate({ body: createProposalSchema }), async (req, res) => {
+router.post('/', createProposalLimiter, protect, authorize('freelancer', 'admin'), requireVerifiedEmail, validate({ body: createProposalSchema }), async (req, res, next) => {
     try {
         // Only freelancers can submit proposals
         if (req.user.role !== 'freelancer' && req.user.role !== 'admin') {
@@ -133,14 +133,14 @@ router.post('/', createProposalLimiter, protect, authorize('freelancer', 'admin'
         if (error.code === 11000) {
             return res.status(400).json({ success: false, message: 'You have already submitted a proposal for this gig' });
         }
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get all proposals for a specific gig
 // @route   GET /api/proposals/gig/:gigId
 // @access  Private (Gig Owner/Client only)
-router.get('/gig/:gigId', protect, async (req, res) => {
+router.get('/gig/:gigId', protect, async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.gigId)) {
             return res.status(400).json({ success: false, message: 'Invalid gig ID format' });
@@ -163,14 +163,14 @@ router.get('/gig/:gigId', protect, async (req, res) => {
 
         res.status(200).json({ success: true, count: proposals.length, data: proposals });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get all proposals across all gigs of the logged-in client
 // @route   GET /api/proposals/client/all-proposals
 // @access  Private (Clients only)
-router.get('/client/all-proposals', protect, authorize('client', 'admin'), async (req, res) => {
+router.get('/client/all-proposals', protect, authorize('client', 'admin'), async (req, res, next) => {
     try {
         // Find all gig IDs belonging to this client
         const clientGigs = await Gig.find({ client: req.user._id }).select('_id');
@@ -184,14 +184,14 @@ router.get('/client/all-proposals', protect, authorize('client', 'admin'), async
         res.status(200).json({ success: true, count: proposals.length, data: proposals });
     } catch (error) {
         console.error('Error fetching client proposals:', error);
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get logged-in freelancer's proposals
 // @route   GET /api/proposals/my-proposals
 // @access  Private (Freelancers only)
-router.get('/my-proposals', protect, async (req, res) => {
+router.get('/my-proposals', protect, async (req, res, next) => {
     try {
         if (req.user.role !== 'freelancer' && req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Only freelancers can view their proposals list' });
@@ -203,14 +203,14 @@ router.get('/my-proposals', protect, async (req, res) => {
 
         res.status(200).json({ success: true, count: proposals.length, data: proposals });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Get single proposal details
 // @route   GET /api/proposals/:id
 // @access  Private (Proposal Owner, Gig Owner, or Admin only)
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, message: 'Invalid proposal ID format' });
@@ -234,14 +234,14 @@ router.get('/:id', protect, async (req, res) => {
 
         res.status(200).json({ success: true, data: proposal });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 
 // @desc    Accept or Reject a proposal
 // @route   PUT /api/proposals/:id
 // @access  Private (Gig Owner/Client only with verified email)
-router.put('/:id', protect, authorize('client', 'admin'), requireVerifiedEmail, validate({ params: idParams, body: proposalStatusSchema }), async (req, res) => {
+router.put('/:id', protect, authorize('client', 'admin'), requireVerifiedEmail, validate({ params: idParams, body: proposalStatusSchema }), async (req, res, next) => {
     const { status } = req.body;
     if (!['accepted', 'rejected'].includes(status)) {
         return res.status(400).json({
@@ -403,7 +403,7 @@ router.put('/:id', protect, authorize('client', 'admin'), requireVerifiedEmail, 
 // @desc    Withdraw/Delete a pending proposal
 // @route   DELETE /api/proposals/:id
 // @access  Private (Freelancer who submitted the proposal only)
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, message: 'Invalid proposal ID format' });
@@ -427,11 +427,12 @@ router.delete('/:id', protect, async (req, res) => {
             });
         }
 
-        await Proposal.findByIdAndDelete(req.params.id);
+        const removed = await Proposal.findOneAndDelete({ _id: req.params.id, status: 'pending' });
+        if (!removed) return res.status(409).json({ success: false, message: 'Proposal already processed' });
 
         res.status(200).json({ success: true, message: 'Proposal withdrawn successfully' });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 

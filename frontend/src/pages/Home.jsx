@@ -26,6 +26,7 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import api from '../utils/api';
 import Seo from '../components/Seo';
+import Logo from '../components/Logo';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -82,9 +83,7 @@ export default function Home() {
           }`}>
             
             {/* Brand Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group shrink-0">
-              <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
-            </Link>
+            <Logo size="md" />
 
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-[14px] font-semibold text-[#5A6675]">

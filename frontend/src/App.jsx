@@ -23,6 +23,7 @@ const ClientDashboard = lazy(() => import('./pages/ClientDashboard'));
 const FreelancerDashboard = lazy(() => import('./pages/FreelancerDashboard'));
 const FreelancerSetupWizard = lazy(() => import('./pages/FreelancerSetupWizard'));
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
+const GitHubCallback = lazy(() => import('./pages/auth/GitHubCallback'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
 const Maintenance = lazy(() => import('./pages/Maintenance'));
@@ -76,6 +77,7 @@ function App() {
                       <Route path="/reset-password/:token" element={<ResetPassword />} />
                       <Route path="/check-email" element={<CheckEmail />} />
                       <Route path="/verify-email/:token" element={<VerifyEmail />} />
+                      <Route path="/auth/github/callback" element={<GitHubCallback />} />
                       <Route path="/dashboard/client" element={<Navigate to="/client/dashboard" replace />} />
                       <Route path="/dashboard/freelancer" element={<Navigate to="/freelancer/dashboard" replace />} />
                       <Route path="/dashboard" element={<Navigate to="/freelancer/dashboard" replace />} />

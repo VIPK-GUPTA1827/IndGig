@@ -11,7 +11,7 @@ const gigPayload = {
 };
 
 describe('Email Verification & Typo Detection', () => {
-  it('Typo email returns 400 and suggests correct domain', async () => {
+  it('Unsupported/fake email provider is rejected with 400', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({
@@ -23,7 +23,7 @@ describe('Email Verification & Typo Detection', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
-    expect(res.body.suggestion).toBe('123@gmail.com');
+    expect(res.body.message).toContain('Please use a valid email');
   });
 
   it('Temporary/disposable email is rejected with 400', async () => {
@@ -38,7 +38,7 @@ describe('Email Verification & Typo Detection', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toContain('Temporary emails');
+    expect(res.body.message).toContain('Please use a valid email');
   });
 
   it('Unverified user is blocked (403), verifies via token, handles double click, then succeeds', async () => {
@@ -55,7 +55,9 @@ describe('Email Verification & Typo Detection', () => {
     expect(reg.status).toBe(201);
     expect(reg.body.requiresVerification).toBe(true);
 
-    const token = reg.body.token;
+    expect(reg.body.token).toBeUndefined();
+    const pendingUser = await User.findOne({ email: 'vipin.gupta@gmail.com' });
+    const token = require('../utils/tokens').signAccessToken(pendingUser);
     const authHeader = { Authorization: `Bearer ${token}` };
 
     // 2. Before verification: POST /api/gigs is blocked with 403

@@ -9,7 +9,7 @@ const router = express.Router();
 // @desc    Get all notifications for logged-in user
 // @route   GET /api/notifications
 // @access  Private
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     const { page, limit, skip } = getPagination(req.query, { defaultLimit: 30, maxLimit: 100 });
     const [total, notifications] = await Promise.all([
@@ -30,14 +30,14 @@ router.get('/', protect, async (req, res) => {
       data: notifications
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Mark all user notifications as read
 // @route   PUT /api/notifications/mark-read
 // @access  Private
-router.put('/mark-read', protect, async (req, res) => {
+router.put('/mark-read', protect, async (req, res, next) => {
   try {
     await Notification.updateMany(
       { recipient: req.user._id, read: false },
@@ -46,14 +46,14 @@ router.put('/mark-read', protect, async (req, res) => {
 
     res.status(200).json({ success: true, message: 'All notifications marked as read' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Mark a specific notification as read
 // @route   PUT /api/notifications/mark-read/:id
 // @access  Private
-router.put('/mark-read/:id', protect, async (req, res) => {
+router.put('/mark-read/:id', protect, async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ success: false, message: 'Invalid notification ID format' });
@@ -73,14 +73,14 @@ router.put('/mark-read/:id', protect, async (req, res) => {
 
     res.status(200).json({ success: true, data: notification });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Get email delivery logs for logged-in user or admin
 // @route   GET /api/notifications/email-logs
 // @access  Private
-router.get('/email-logs', protect, async (req, res) => {
+router.get('/email-logs', protect, async (req, res, next) => {
   try {
     const EmailLog = require('../models/EmailLog');
     const filter = req.user.role === 'admin' 
@@ -112,14 +112,14 @@ router.get('/email-logs', protect, async (req, res) => {
       data: emailLogs
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return next(error);
   }
 });
 
 // @desc    Send a test transactional email and log result
 // @route   POST /api/notifications/test-email
 // @access  Private
-router.post('/test-email', protect, authorize('admin'), async (req, res) => {
+router.post('/test-email', protect, authorize('admin'), async (req, res, next) => {
   if (process.env.NODE_ENV === 'production' && process.env.ALLOW_TEST_EMAIL !== 'true') {
     return res.status(404).json({ success: false, message: 'Not found' });
   }

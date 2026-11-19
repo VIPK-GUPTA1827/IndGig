@@ -10,7 +10,7 @@ const router = express.Router();
 // @desc    Get freelancer analytics metrics
 // @route   GET /api/analytics/freelancer
 // @access  Private (Freelancer only)
-router.get('/freelancer', protect, async (req, res) => {
+router.get('/freelancer', protect, async (req, res, next) => {
     try {
         if (req.user.role !== 'freelancer' && req.user.role !== 'admin') {
             return res.status(403).json({ success: false, message: 'Only freelancers can access analytics' });
@@ -77,7 +77,7 @@ router.get('/freelancer', protect, async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        return next(error);
     }
 });
 

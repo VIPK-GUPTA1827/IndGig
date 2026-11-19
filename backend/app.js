@@ -17,6 +17,7 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
+app.use(require('./middleware/requestOrigin'));
 app.use(sanitizeInput);
 
 const api = express.Router();

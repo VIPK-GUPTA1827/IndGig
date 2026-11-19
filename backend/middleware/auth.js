@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
 const SAFE_SELECT = '-password -resetPasswordToken -resetPasswordExpire -emailVerificationToken -emailVerificationExpire';
@@ -10,7 +11,7 @@ const getToken = (req) => {
   return null;
 };
 
-const protect = async (req, res, next) => {
+const protectSession = async (req, res, next) => {
   const token = getToken(req);
   if (!token) {
     return res.status(401).json({
@@ -21,7 +22,8 @@ const protect = async (req, res, next) => {
 
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+    if (typeof decoded.id !== 'string' || !mongoose.isObjectIdOrHexString(decoded.id)) throw new Error('Invalid subject');
   } catch (error) {
     const expired = error.name === 'TokenExpiredError';
     return res.status(401).json({
@@ -57,6 +59,18 @@ const protect = async (req, res, next) => {
   req.user = user;
   next();
 };
+
+// Default for all private API routes: email ownership is mandatory.
+const protect = (req, res, next) => protectSession(req, res, () => {
+  if (!req.user.isEmailVerified) {
+    return res.status(403).json({
+      success: false, requiresVerification: true,
+      email: req.user.email,
+      message: 'Verify your email address before opening your workspace.'
+    });
+  }
+  next();
+});
 
 // Role-based authorization middleware
 const authorize = (...roles) => {
@@ -94,9 +108,10 @@ const optionalAuth = async (req, res, next) => {
   const token = getToken(req);
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+      if (typeof decoded.id !== 'string' || !mongoose.isObjectIdOrHexString(decoded.id)) throw new Error('Invalid subject');
       const user = await User.findById(decoded.id).select(SAFE_SELECT);
-      if (user && !user.isSuspended && (decoded.v || 0) === (user.tokenVersion || 0)) {
+      if (user && user.isEmailVerified && !user.isSuspended && (decoded.v || 0) === (user.tokenVersion || 0)) {
         req.user = user;
       }
     } catch (error) {
@@ -106,4 +121,4 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { protect, authorize, requireVerifiedEmail, optionalAuth };
+module.exports = { protect, protectSession, authorize, requireVerifiedEmail, optionalAuth };
