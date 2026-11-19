@@ -992,7 +992,7 @@ router.get('/me', protect, async (req, res) => {
             user: formatUserResponse(req.user)
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to complete registration. Please try again later.') });
+        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to retrieve session profile. Please try again later.') });
     }
 });
 
@@ -1121,7 +1121,8 @@ router.put('/profile', protect, async (req, res) => {
         } else {
             const hasValidSkills = user.skills && user.skills.length > 0;
             const hasValidBio = user.bio && user.bio.trim().length >= 10;
-            user.isProfileComplete = Boolean(hasValidSkills && hasValidBio);
+            const hasCategories = user.preferredCategories && user.preferredCategories.length > 0;
+            user.isProfileComplete = Boolean(hasValidSkills && hasValidBio && hasCategories);
         }
 
         await user.save();
@@ -1133,7 +1134,7 @@ router.put('/profile', protect, async (req, res) => {
             user: formatUserResponse(user)
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to complete registration. Please try again later.') });
+        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to update profile. Please try again later.') });
     }
 });
 
@@ -1162,7 +1163,7 @@ router.post('/portfolio', protect, authorize('freelancer'), async (req, res) => 
         await user.save();
         res.status(201).json({ success: true, message: 'Portfolio item added successfully', data: user });
     } catch (error) {
-        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to complete registration. Please try again later.') });
+        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to save portfolio project. Please try again later.') });
     }
 });
 
@@ -1181,7 +1182,7 @@ router.delete('/portfolio/:itemId', protect, authorize('freelancer'), async (req
 
         res.status(200).json({ success: true, message: 'Portfolio item deleted successfully', data: user });
     } catch (error) {
-        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to complete registration. Please try again later.') });
+        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to delete portfolio project. Please try again later.') });
     }
 });
 
@@ -1254,7 +1255,7 @@ router.get('/user/:id', optionalAuth, async (req, res) => {
 
         res.json({ success: true, data: userObj });
     } catch (error) {
-        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to complete registration. Please try again later.') });
+        res.status(500).json({ success: false, message: safeErrorMessage(error, 'Unable to load user profile. Please try again later.') });
     }
 });
 
