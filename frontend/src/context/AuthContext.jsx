@@ -68,6 +68,15 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  // GitHub Login function
+  const loginWithGitHub = async (code, role = 'freelancer') => {
+    const data = await api.post('/api/auth/github', { code, role });
+    if (data.user) {
+      setUser(data.user);
+    }
+    return data;
+  };
+
   // Switch role between Client and Freelancer
   const switchRole = async () => {
     const data = await api.post('/api/auth/switch-role');
@@ -96,7 +105,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, register, login, loginWithGoogle, switchRole, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, loading, register, login, loginWithGoogle, loginWithGitHub, switchRole, logout, updateUser, setUser }}>
       {children}
     </AuthContext.Provider>
   );

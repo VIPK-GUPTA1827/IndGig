@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -7,8 +7,9 @@ import api from '../../utils/api';
 export default function GitHubCallback() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { loginWithGitHub } = useAuth();
   const [error, setError] = useState('');
+  const exchangedRef = useRef(false);
 
   useEffect(() => {
     const code = searchParams.get('code');
@@ -19,19 +20,20 @@ export default function GitHubCallback() {
       return;
     }
 
+    if (exchangedRef.current) return;
+    exchangedRef.current = true;
+
     async function exchangeCode() {
       try {
-        const res = await api.post('/api/auth/github', { code, role });
-        if (res.success && res.user) {
-          setUser(res.user);
-          localStorage.setItem('user', JSON.stringify(res.user));
+        const res = await loginWithGitHub(code, role);
+        if (res && res.user) {
           if (res.user.role === 'client') {
-            navigate('/client/dashboard');
+            navigate('/client/dashboard', { replace: true });
           } else {
-            navigate('/freelancer/dashboard');
+            navigate('/freelancer/dashboard', { replace: true });
           }
         } else {
-          setError(res.message || 'GitHub login failed.');
+          setError(res?.message || 'GitHub login failed.');
         }
       } catch (err) {
         console.error('GitHub exchange error:', err);
@@ -40,7 +42,7 @@ export default function GitHubCallback() {
     }
 
     exchangeCode();
-  }, [searchParams, navigate, setUser]);
+  }, [searchParams, navigate, loginWithGitHub]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
