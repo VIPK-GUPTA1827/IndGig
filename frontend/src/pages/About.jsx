@@ -110,6 +110,50 @@ export default function About() {
             </p>
           </section>
 
+          {/* Founding Team Section */}
+          <section className="space-y-4 pt-4 border-t border-stone-100">
+            <div>
+              <h2 className="text-xl font-display font-bold text-[#030B3D]">
+                Who is building IndGig
+              </h2>
+              <p className="text-stone-600 text-xs mt-1">
+                A small team trying to make freelance tech work simpler and more reliable.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Vipin Gupta */}
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 flex items-start gap-3.5">
+                <img
+                  src="/images/vipin_founder.jpg"
+                  alt="Vipin Gupta"
+                  className="w-14 h-14 rounded-xl object-cover border border-stone-200 shadow-xs shrink-0"
+                />
+                <div className="space-y-1">
+                  <h3 className="font-bold text-[#030B3D] text-sm">Vipin Gupta</h3>
+                  <p className="text-xs font-semibold text-accent-text">Founder & Developer</p>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    Works on IndGig’s product, backend architecture, and design.
+                  </p>
+                </div>
+              </div>
+
+              {/* Abhinandan Girjash Pandey */}
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 flex items-start gap-3.5">
+                <div className="w-14 h-14 rounded-xl bg-stone-200 border border-stone-300 flex items-center justify-center font-bold text-stone-700 text-base shadow-xs shrink-0">
+                  AP
+                </div>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-[#030B3D] text-sm">Abhinandan Girjash Pandey</h3>
+                  <p className="text-xs font-semibold text-accent-text">Co-Founder & Growth</p>
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    Focuses on community outreach, user feedback, and partnerships.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Action CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Link to="/marketplace" className="rounded-full bg-accent-text hover:bg-accent-deep text-white text-center py-3 px-6 font-bold text-sm active:scale-95 transition-all">
