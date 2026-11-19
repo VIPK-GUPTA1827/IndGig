@@ -34,7 +34,7 @@ export default function GitHubAuthButton({ role = 'freelancer', text = 'Continue
       type="button"
       onClick={handleGitHubClick}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50"
+      className="w-full h-[44px] flex items-center justify-center gap-3 px-4 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm transition-all shadow-xs cursor-pointer disabled:opacity-50"
     >
       {loading ? (
         <Loader2 className="w-4 h-4 animate-spin text-slate-400" />

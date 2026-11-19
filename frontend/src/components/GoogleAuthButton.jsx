@@ -116,7 +116,7 @@ export default function GoogleAuthButton({ role = 'client', isSignup = false, te
   };
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative min-h-[44px] flex items-center justify-center">
       {loading && (
         <div className="absolute inset-0 bg-white/80 z-20 flex items-center justify-center rounded-xl backdrop-blur-xs">
           <div className="flex items-center gap-2 text-xs font-semibold text-accent-text">
@@ -129,7 +129,7 @@ export default function GoogleAuthButton({ role = 'client', isSignup = false, te
       {/* Render container for official Google button */}
       <div 
         ref={buttonRef} 
-        className="w-full flex justify-center items-center [&>div]:mx-auto"
+        className="w-full flex justify-center items-center [&>div]:mx-auto min-h-[44px]"
       />
 
       {/* Fallback button if script is loading */}
@@ -138,7 +138,7 @@ export default function GoogleAuthButton({ role = 'client', isSignup = false, te
           type="button"
           onClick={handleCustomClick}
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl border border-stone-200/90 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-sm shadow-xs transition-all flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full h-[44px] px-4 rounded-xl border border-stone-200/90 bg-white hover:bg-stone-50 text-stone-700 font-semibold text-sm shadow-xs transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path

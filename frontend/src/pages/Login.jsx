@@ -111,8 +111,8 @@ export default function Login() {
       </header>
 
       {/* Main Login Card */}
-      <main className="w-full max-w-[440px] mx-auto my-auto relative z-10 pt-4 pb-6">
-        <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50">
+      <main className="w-full max-w-[440px] mx-auto my-auto relative z-10 py-4">
+        <div className="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 transition-all">
           
           <div className="text-center mb-6">
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#030B3D]">
