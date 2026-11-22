@@ -57,9 +57,8 @@ const CATEGORIES = [
   'Graphic Design'
 ];
 
-const BASE = API_BASE;
-
 export default function ClientDashboard() {
+  const { toast } = useToast();
   const { user, logout, switchRole, loading: authLoading, updateUser } = useAuth();
   const navigate = useNavigate();
 
