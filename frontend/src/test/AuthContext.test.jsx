@@ -86,4 +86,27 @@ describe('AuthContext', () => {
 
     expect(api.post).toHaveBeenCalledWith('/api/auth/logout');
   });
+
+  it('retries on status 0 network error and recovers on success', async () => {
+    // First call fails with status 0 (network drop), second call recovers
+    api.get
+      .mockRejectedValueOnce({ status: 0, message: 'Network Error' })
+      .mockResolvedValueOnce({
+        success: true,
+        user: { _id: '123', name: 'Vipin Gupta', email: 'vipin@example.com', role: 'freelancer' }
+      });
+
+    render(
+      <AuthProvider>
+        <ConsumerComponent />
+      </AuthProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText('Auth Loading...')).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('user-name')).toHaveTextContent('Vipin Gupta');
+    expect(api.get).toHaveBeenCalledTimes(2);
+  });
 });
