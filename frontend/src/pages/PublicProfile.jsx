@@ -62,35 +62,40 @@ export default function PublicProfile() {
   const isOwnProfile = (!id || id === 'me' || (currentUser && currentUser._id === id));
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        let endpoint = '';
-        if (!id || id === 'me') {
-          endpoint = '/auth/me';
-        } else {
-          endpoint = `/auth/user/${id}`;
-        }
+    let cancelled = false;
+    setLoading(true);
+    setError('');
 
-        const data = await api.get(endpoint);
+    const endpoint = !id || id === 'me'
+      ? '/api/auth/me'
+      : `/api/auth/user/${encodeURIComponent(id)}`;
+
+    api.get(endpoint)
+      .then((data) => {
+        if (cancelled) return;
         if (!data || !data.success) {
           throw new Error(data?.message || 'Profile not found');
         }
-
-        // Handle both shapes (data.user or data.data)
         const userObj = data.data || data.user;
         setProfileData(userObj);
+        setAvatarFailed(false);
         document.title = `${userObj?.name || userObj?.username || 'Profile'} — IndGig`;
-      } catch (err) {
-        console.error('Profile fetch failed:', err);
-        setError(err.message || 'Failed to load user profile');
-      } finally {
-        setLoading(false);
-      }
-    };
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error('Profile fetch failed:', err);
+          setError(err.message || 'Failed to load user profile');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
 
-    fetchProfile();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   const handleShare = () => {

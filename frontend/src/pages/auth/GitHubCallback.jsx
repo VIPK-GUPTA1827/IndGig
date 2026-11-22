@@ -11,27 +11,20 @@ export default function GitHubCallback() {
   const exchangedRef = useRef(false);
 
   useEffect(() => {
+    if (exchangedRef.current) return;
+
     const code = searchParams.get('code');
     const returnedState = searchParams.get('state');
     const storedState = sessionStorage.getItem('oauth_state');
     const role = sessionStorage.getItem('oauth_role') || 'freelancer';
 
-    if (!code) {
-      setError('No authorization code provided by GitHub.');
+    if (!code || !storedState || returnedState !== storedState) {
+      setError('Login expired. Please start GitHub login again.');
       return;
     }
 
-    // CSRF verification: validate state match if state was initiated
-    if (storedState && returnedState !== storedState) {
-      setError('Invalid or expired security token (CSRF check failed). Please initiate login again.');
-      return;
-    }
-
-    // Clean up stored state once validated
-    sessionStorage.removeItem('oauth_state');
-
-    if (exchangedRef.current) return;
     exchangedRef.current = true;
+    sessionStorage.removeItem('oauth_state');
 
     async function exchangeCode() {
       try {
