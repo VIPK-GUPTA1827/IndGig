@@ -375,8 +375,11 @@ export default function ClientDashboard() {
 
   // Set Specific Project Status (open, paused, closed)
   const handleSetStatus = async (gigId, newStatus) => {
+    const currentGig = myGigs.find(gig => gig._id === gigId);
+    if (!currentGig) return;
+    setActionLoadingId(gigId);
+    setErrorMsg('');
     try {
-      setActionLoadingId(gigId);
       const data = await api.put(`/api/gigs/${gigId}`, { status: newStatus });
       if (!data.success) throw new Error(data.message || `Failed to update status to ${newStatus}`);
       
@@ -388,7 +391,8 @@ export default function ClientDashboard() {
       setSuccessMsg(statusLabels[newStatus] || `Project marked as ${newStatus}!`);
       await fetchClientData();
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(err.message || 'Failed to update project status');
+      if (err.status === 409) await fetchClientData();
     } finally {
       setActionLoadingId(null);
     }
@@ -432,6 +436,18 @@ export default function ClientDashboard() {
 
       setSuccessMsg(`Proposal ${status === 'accepted' ? 'accepted and initiated in Demo Mode (Simulated Escrow)' : 'declined'}.`);
       await fetchClientData();
+
+      // Refresh client's wallet balance in AuthContext after escrow hold
+      if (status === 'accepted') {
+        try {
+          const meRes = await api.get('/api/auth/me');
+          if (meRes.success && meRes.user) {
+            updateUser(meRes.user);
+          }
+        } catch (balErr) {
+          console.warn('Failed to refresh user balance after proposal acceptance:', balErr);
+        }
+      }
     } catch (err) {
       setErrorMsg(err.message || `Error updating proposal.`);
     } finally {
