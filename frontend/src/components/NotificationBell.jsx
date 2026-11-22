@@ -14,8 +14,6 @@ import {
 } from 'lucide-react';
 import io from 'socket.io-client';
 
-const BASE = API_BASE;
-
 export default function NotificationBell({ userRole = 'freelancer', onNavigateToGig }) {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +27,13 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
       setLoading(true);
       const data = await api.get('/api/notifications');
       if (data && data.success) {
-        setNotifications(data.data || []);
+        const fetchedList = data.data || [];
+        setNotifications(prev => {
+          // Merge fetched list with any freshly arrived notifications to prevent race-condition overwrite
+          const fetchedIds = new Set(fetchedList.map(n => n._id));
+          const recentUnfetched = prev.filter(n => !fetchedIds.has(n._id));
+          return [...recentUnfetched, ...fetchedList];
+        });
       }
     } catch (err) {
       console.error('Failed to fetch notifications:', err);
@@ -41,17 +45,28 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
   useEffect(() => {
     fetchNotifications();
 
-    const SOCKET_URL = API_BASE || (import.meta.env.DEV ? 'http://127.0.0.1:5000' : '');
-    if (!SOCKET_URL) return;
+    const socketUrl = API_BASE || (
+      import.meta.env.DEV 
+        ? 'http://127.0.0.1:5000' 
+        : window.location.origin
+    );
 
-    // Listen for real-time socket events
-    const socket = io(SOCKET_URL, {
+    // Listen for real-time socket events with credentials
+    const socket = io(socketUrl, {
       withCredentials: true,
       transports: ['websocket', 'polling']
     });
-    socket.on('new_notification', (newNotif) => {
-      setNotifications(prev => [newNotif, ...prev]);
+
+    // Reconcile and deduplicate on incoming notification
+    socket.on('new_notification', (incoming) => {
+      setNotifications(prev => [
+        incoming,
+        ...prev.filter(item => item._id !== incoming._id)
+      ]);
     });
+
+    // Refetch on socket reconnect to reconcile missed messages
+    socket.on('connect', fetchNotifications);
 
     return () => {
       socket.disconnect();
