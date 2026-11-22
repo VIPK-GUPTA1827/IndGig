@@ -138,15 +138,15 @@ export default function About() {
                 </div>
               </div>
 
-              {/* Abhinandan Girjash Pandey */}
+              {/* Abhinandan Girjesh Pandey */}
               <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-stone-200/80 flex items-start gap-3.5">
                 <img
                   src="/images/abhinandan_cofounder.jpg"
-                  alt="Abhinandan Girjash Pandey"
+                  alt="Abhinandan Girjesh Pandey"
                   className="w-14 h-14 rounded-xl object-cover border border-stone-200 shadow-xs shrink-0"
                 />
                 <div className="space-y-1">
-                  <h3 className="font-bold text-[#030B3D] text-sm">Abhinandan Girjash Pandey</h3>
+                  <h3 className="font-bold text-[#030B3D] text-sm">Abhinandan Girjesh Pandey</h3>
                   <p className="text-xs font-semibold text-accent-text">Co-Founder & Growth</p>
                   <p className="text-xs text-stone-600 leading-relaxed">
                     Focuses on community outreach, user feedback, and partnerships.
