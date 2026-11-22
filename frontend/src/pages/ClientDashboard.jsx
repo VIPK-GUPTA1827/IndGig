@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useModalDismiss } from '../hooks/useModalDismiss';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -157,6 +158,13 @@ export default function ClientDashboard() {
       });
     }
   }, [user?._id, user?.role]);
+
+  // Escape key & scroll-lock for modals
+  useModalDismiss(isPostModalOpen, () => {
+    setIsPostModalOpen(false);
+    setEditingGigId(null);
+  });
+  useModalDismiss(revisionModalOpen, () => setRevisionModalOpen(false));
 
   // Handle Save Company Profile
   const handleSaveCompanyProfile = async (e) => {
