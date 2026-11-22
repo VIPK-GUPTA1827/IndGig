@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useModalDismiss } from '../hooks/useModalDismiss';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -93,6 +94,21 @@ export default function FreelancerDashboard() {
   const [submittingAction, setSubmittingAction] = useState(false);
   const [actionError, setActionError] = useState('');
   const [actionSuccess, setActionSuccess] = useState('');
+
+  // Escape key & scroll-lock for modals
+  useModalDismiss(isProposalModalOpen, () => {
+    setIsProposalModalOpen(false);
+    setSelectedGigForBid(null);
+  });
+  useModalDismiss(isDeliverableModalOpen, () => {
+    setIsDeliverableModalOpen(false);
+    setSelectedContractMilestone(null);
+  });
+  useModalDismiss(isEditProfileOpen, () => setIsEditProfileOpen(false));
+  useModalDismiss(isAddPortfolioOpen, () => setIsAddPortfolioOpen(false));
+  useModalDismiss(incompleteProfileModal.isOpen, () => {
+    setIncompleteProfileModal({ isOpen: false, missingFields: [] });
+  });
 
   // Helper to re-fetch contracts after milestone submission
   const fetchContracts = async () => {
