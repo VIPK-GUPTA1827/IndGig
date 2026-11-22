@@ -167,11 +167,8 @@ export default function PublicProfile() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <Link to="/" className="font-black text-xl text-slate-900 tracking-tight flex items-center gap-1.5">
-              <span className="w-8 h-8 rounded-xl bg-gradient-to-br from-accent to-accent-deep flex items-center justify-center text-white text-sm font-black shadow-sm">
-                G
-              </span>
-              IndGig
+            <Link to="/" className="inline-flex items-center gap-2 group">
+              <img src="/indgig_logo.png" alt="IndGig" className="h-8 sm:h-9 w-auto object-contain" />
             </Link>
           </div>
 
