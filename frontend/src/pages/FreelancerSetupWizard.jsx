@@ -1,7 +1,7 @@
-import { API_BASE } from '../utils/apiBase';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 import { 
   Sparkles, 
   Code, 
@@ -36,8 +36,6 @@ const POPULAR_SKILLS = [
   'FastAPI', 'Figma', 'Next.js', 'TypeScript', 'Express',
   'UI/UX Design', 'SQL', 'Docker', 'Machine Learning'
 ];
-
-const BASE = API_BASE;
 
 const FreelancerSetupWizard = () => {
   const { user, loading, updateUser } = useAuth();
@@ -222,38 +220,32 @@ const FreelancerSetupWizard = () => {
         isProfileComplete: formData.skills.length > 0 && formData.bio.trim().length >= 10
       };
 
-      const res = await fetch(`${BASE}/api/freelancer/profile`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to save freelancer profile');
+      // 1. Submit freelancer profile via centralized api client
+      const data = await api.put('/api/freelancer/profile', payload);
+      if (!data || !data.success) {
+        throw new Error(data?.message || 'Failed to save freelancer profile');
       }
 
-      // 2. If portfolio data provided, submit portfolio
+      // 2. Update auth state immediately
+      updateUser(data.data || { ...user, ...payload, isProfileComplete: payload.isProfileComplete });
+
+      // 3. If portfolio data provided, submit via centralized api client
       if (!isSkippingPortfolio && formData.portfolioTitle.trim()) {
         try {
-          await fetch(`${BASE}/api/auth/portfolio`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              title: formData.portfolioTitle.trim(),
-              description: formData.portfolioDesc.trim(),
-              projectUrl: formData.portfolioUrl.trim()
-            })
+          const portRes = await api.post('/api/auth/portfolio', {
+            title: formData.portfolioTitle.trim(),
+            description: formData.portfolioDesc.trim(),
+            projectUrl: formData.portfolioUrl.trim()
           });
+          if (!portRes || !portRes.success) {
+            throw new Error(portRes?.message || 'Portfolio save failed');
+          }
         } catch (portErr) {
-          console.warn('Portfolio addition warning:', portErr);
+          setErrorMsg(`Profile saved. Portfolio pending: ${portErr.message || 'Failed to save portfolio'}`);
+          return;
         }
       }
 
-      // 3. Update auth state and navigate to dashboard
-      updateUser(data.data || { ...user, ...payload, isProfileComplete: payload.isProfileComplete });
       navigate('/freelancer/dashboard', { replace: true });
     } catch (err) {
       setErrorMsg(err.message || "Couldn't save your profile. Please try again.");
