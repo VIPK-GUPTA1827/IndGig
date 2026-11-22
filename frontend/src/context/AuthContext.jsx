@@ -23,11 +23,11 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch (err) {
-        // Retry once on pure network failure (no HTTP status code)
-        const isNetworkError = err.status === undefined;
+        // Retry once on pure network failure (status === 0 from api wrapper or undefined)
+        const isNetworkError = err.status === 0 || err.status === undefined;
         if (isNetworkError && retries > 0) {
           await new Promise((r) => setTimeout(r, 350));
-          if (isMounted) return checkAuth(retries - 1);
+          if (isMounted) return await checkAuth(retries - 1);
         }
         console.error('Session check error:', err);
         if (isMounted) setUser(null);
