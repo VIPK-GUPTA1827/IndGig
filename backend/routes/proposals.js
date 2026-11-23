@@ -308,6 +308,21 @@ router.put('/:id', protect, authorize('client', 'admin'), requireVerifiedEmail, 
         }
 
         // 2. Gig claim: open -> in-progress (ek hi jeetega)
+        // If gig already has defined milestones, validate amount consistency
+        const gigRecord = await Gig.findById(gigId).session(session);
+        if (!gigRecord || gigRecord.status !== 'open') throw new AppError('Gig is no longer open', 409);
+
+        if (Array.isArray(gigRecord.milestones) && gigRecord.milestones.length > 0) {
+            const amounts = gigRecord.milestones.map(item => Number(item.budget || item.amount || 0));
+            if (amounts.some(val => !Number.isSafeInteger(val) || val <= 0)) {
+                throw new AppError('Milestones must use positive whole-rupee amounts', 400);
+            }
+            const total = amounts.reduce((sum, val) => sum + val, 0);
+            if (!Number.isSafeInteger(total) || total !== accepted.bidAmount) {
+                throw new AppError('Milestone total must match agreed bid', 409);
+            }
+        }
+
         const gig = await Gig.findOneAndUpdate(
             { _id: gigId, status: 'open' },
             { $set: {

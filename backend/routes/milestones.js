@@ -87,25 +87,21 @@ router.put('/reorder', protect, async (req, res) => {
         }
 
         const { milestoneIds } = req.body;
-        if (!Array.isArray(milestoneIds) || milestoneIds.length !== gig.milestones.length) {
-            return res.status(400).json({ success: false, message: 'Invalid milestone IDs array provided' });
+        const existing = new Map(gig.milestones.map(item => [item._id.toString(), item]));
+        const valid = Array.isArray(milestoneIds) &&
+            milestoneIds.length === existing.size &&
+            milestoneIds.every(id => typeof id === 'string') &&
+            new Set(milestoneIds).size === milestoneIds.length &&
+            milestoneIds.every(id => existing.has(id));
+
+        if (!valid) {
+            return res.status(400).json({
+                success: false,
+                message: 'Each milestone is required once'
+            });
         }
 
-        // Map existing milestones by ID string
-        const milestoneMap = new Map();
-        gig.milestones.forEach(m => milestoneMap.set(m._id.toString(), m));
-
-        // Reconstruct array in specified order
-        const reordered = [];
-        for (const id of milestoneIds) {
-            const m = milestoneMap.get(id);
-            if (!m) {
-                return res.status(400).json({ success: false, message: 'Milestone list mismatch' });
-            }
-            reordered.push(m);
-        }
-
-        gig.milestones = reordered;
+        gig.milestones = milestoneIds.map(id => existing.get(id));
         await gig.save();
 
         res.json({ 

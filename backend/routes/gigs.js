@@ -672,6 +672,46 @@ router.put('/:id/complete', protect, async (req, res, next) => {
     }
 });
 
+// @desc    Pause, reopen, or close a project with atomic status transition check
+// @route   PATCH /api/gigs/:id/status
+// @access  Private (Client owner or admin)
+router.patch('/:id/status', protect, authorize('client', 'admin'), async (req, res, next) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            throw new AppError('Invalid project ID', 400);
+        }
+
+        const { expectedStatus, status } = req.body;
+        const transitions = {
+            open: ['paused', 'closed'],
+            paused: ['open', 'closed'],
+            closed: ['open']
+        };
+
+        if (!Object.hasOwn(transitions, expectedStatus) || !transitions[expectedStatus].includes(status)) {
+            throw new AppError('Invalid status transition', 400);
+        }
+
+        const filter = { _id: req.params.id, status: expectedStatus };
+        if (req.user.role !== 'admin') filter.client = req.user._id;
+
+        const gig = await Gig.findOneAndUpdate(
+            filter,
+            { $set: { status } },
+            { returnDocument: 'after', runValidators: true }
+        );
+
+        if (!gig) throw new AppError('Reload project before retry', 409);
+
+        await clearCache('cache:/api/gigs').catch(() => {});
+        await clearCache('cache:/api/v1/gigs').catch(() => {});
+
+        res.json({ success: true, data: gig });
+    } catch (error) {
+        next(error);
+    }
+});
+
 // Milestone Sub-Router (modularized under RealWorld architecture standard)
 router.use('/:id/milestones', require('./milestones'));
 
