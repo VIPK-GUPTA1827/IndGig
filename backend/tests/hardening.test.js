@@ -79,6 +79,53 @@ describe('Backend hardening regressions', () => {
     const e = await Escrow.findById(escrow._id);
     expect(g.status === 'disputed' ? e.status === 'held' : e.status === 'released').toBe(true);
   });
+  it('blocks milestone payout after a dispute', async () => {
+    const { client, gig, escrow } = await makeContract();
+    // Add a positive pending milestone to gig
+    gig.milestones = [{
+      title: 'Phase 1 Delivery',
+      budget: 1000,
+      status: 'submitted'
+    }];
+    await gig.save();
+
+    await request(app).post('/api/disputes')
+      .set(client.authHeader).send({
+        gigId: String(gig._id),
+        reason: 'Other',
+        explanation: 'Delivery differs from the agreed scope.'
+      }).expect(201);
+
+    const beforeFreelancer = await User.findById(gig.freelancer);
+    const milestoneId = gig.milestones[0]._id;
+
+    await request(app)
+      .put(`/api/gigs/${gig._id}/milestones/${milestoneId}/approve`)
+      .set(client.authHeader).send({}).expect(409);
+
+    const afterFreelancer = await User.findById(gig.freelancer);
+    const storedEscrow = await Escrow.findById(escrow._id);
+
+    expect(afterFreelancer.walletBalance).toBe(beforeFreelancer.walletBalance);
+    expect(storedEscrow.releasedAmount || 0).toBe(0);
+  });
+  it('rejects duplicate milestone IDs in reorder request', async () => {
+    const { client, gig } = await makeContract();
+    gig.milestones = [
+      { title: 'Milestone 1', budget: 500, status: 'pending' },
+      { title: 'Milestone 2', budget: 500, status: 'pending' }
+    ];
+    await gig.save();
+
+    const id1 = gig.milestones[0]._id.toString();
+    const res = await request(app)
+      .put(`/api/gigs/${gig._id}/milestones/reorder`)
+      .set(client.authHeader)
+      .send({ milestoneIds: [id1, id1] });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Each milestone is required once');
+  });
   it('rejects negative and non-finite internal wallet mutations', async () => {
     const { user } = await makeUser({ walletBalance: 100 });
     const { credit, debit } = require('../utils/wallet');
