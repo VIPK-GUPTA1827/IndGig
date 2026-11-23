@@ -298,6 +298,10 @@ router.put('/:milestoneId/approve', protect, async (req, res, next) => {
                 throw new AppError('Not authorized to approve milestones for this project', 403);
             }
 
+            if (gig.status !== 'in-progress') {
+                throw new AppError('Contract is not active for payout', 409);
+            }
+
             if (!gig.freelancer) {
                 throw new AppError('No freelancer assigned to this contract', 400);
             }

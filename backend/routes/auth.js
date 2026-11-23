@@ -603,20 +603,27 @@ router.post('/github', async (req, res) => {
             }
         });
         const emailsData = await emailsRes.json();
-        let primaryEmail = ghProfile.email;
-        if (Array.isArray(emailsData)) {
-            const primary = emailsData.find(e => e.primary && e.verified) || emailsData.find(e => e.verified) || emailsData[0];
-            if (primary) primaryEmail = primary.email;
-        }
 
-        if (!primaryEmail) {
-            return res.status(400).json({
+        if (!userRes.ok || !emailsRes.ok || !ghProfile.id || !Array.isArray(emailsData)) {
+            return res.status(502).json({
                 success: false,
-                message: 'No verified public or private email accessible from your GitHub profile.'
+                message: 'GitHub identity lookup failed'
             });
         }
 
-        primaryEmail = primaryEmail.toLowerCase().trim();
+        const verifiedEmails = emailsData.filter(item =>
+            item.verified === true && typeof item.email === 'string'
+        );
+        const selected = verifiedEmails.find(item => item.primary) || verifiedEmails[0];
+
+        if (!selected || !selected.email) {
+            return res.status(401).json({
+                success: false,
+                message: 'Verified GitHub email required'
+            });
+        }
+
+        const primaryEmail = selected.email.toLowerCase().trim();
         const githubId = String(ghProfile.id);
         const name = ghProfile.name || ghProfile.login || 'GitHub Developer';
         const avatar = ghProfile.avatar_url || '';
@@ -627,6 +634,30 @@ router.post('/github', async (req, res) => {
         });
 
         if (user) {
+            if (user.githubId && user.githubId !== githubId) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Account linking needs confirmation'
+                });
+            }
+
+            if (user.isSuspended) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Account suspended'
+                });
+            }
+
+            const linkingUnverifiedLocal = !user.githubId &&
+                !user.isEmailVerified && user.authProvider === 'local';
+
+            if (linkingUnverifiedLocal) {
+                user.password = undefined;
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpire = undefined;
+                user.tokenVersion = (user.tokenVersion || 0) + 1;
+            }
+
             if (!user.githubId) user.githubId = githubId;
             if (!user.isEmailVerified) user.isEmailVerified = true;
             if (!user.avatar && avatar) user.avatar = avatar;
