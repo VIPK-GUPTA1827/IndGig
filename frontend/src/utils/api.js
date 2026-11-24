@@ -11,7 +11,7 @@ const NO_REFRESH_PATHS = [
 
 let refreshPromise = null;
 
-async function refreshSession() {
+export async function refreshSession() {
   if (!refreshPromise) {
     refreshPromise = fetch(`${BASE}/api/auth/refresh`, {
       method: 'POST',

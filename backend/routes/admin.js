@@ -159,6 +159,13 @@ router.put('/users/:id/suspend', protect, adminOnly, async (req, res, next) => {
         }
         await user.save();
 
+        if (user.isSuspended) {
+            const io = req.app.get('io');
+            if (io) {
+                io.in(String(user._id)).disconnectSockets(true);
+            }
+        }
+
         res.status(200).json({
             success: true,
             message: `User account suspension set to ${user.isSuspended}`,

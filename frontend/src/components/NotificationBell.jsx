@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import api, { refreshSession } from '../utils/api';
 import { API_BASE } from '../utils/apiBase';
 import { 
   Bell, 
@@ -57,6 +57,20 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
       transports: ['websocket', 'polling']
     });
 
+    let disposed = false;
+    let recovering = false;
+
+    const recoverSession = async () => {
+      try {
+        const refreshed = await refreshSession();
+        if (refreshed && !disposed) socket.connect();
+      } catch (error) {
+        console.warn('Session refresh failed:', error.message);
+      } finally {
+        recovering = false;
+      }
+    };
+
     // Reconcile and deduplicate on incoming notification
     socket.on('new_notification', (incoming) => {
       setNotifications(prev => [
@@ -68,17 +82,17 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
     // Refetch on socket reconnect to reconcile missed messages
     socket.on('connect', fetchNotifications);
 
-    // Reconnect socket on session_expired notification if auth refresh recovers
-    socket.on('session_expired', async () => {
-      try {
-        await api.post('/api/auth/refresh');
-        socket.connect();
-      } catch (err) {
-        console.warn('Socket session expired, user logged out');
-      }
+    socket.on('session_expired', () => {
+      if (disposed || recovering) return;
+      recovering = true;
+      // Server emits session_expired before disconnecting
+      socket.once('disconnect', recoverSession);
     });
 
     return () => {
+      disposed = true;
+      socket.off('disconnect', recoverSession);
+      socket.removeAllListeners();
       socket.disconnect();
     };
   }, []);

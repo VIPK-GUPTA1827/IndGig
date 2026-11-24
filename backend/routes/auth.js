@@ -577,7 +577,7 @@ router.post('/github/start', authLimiter, async (req, res) => {
             secure: isProd,
             sameSite: isProd ? 'none' : 'lax',
             maxAge: 10 * 60 * 1000,
-            path: '/api/auth'
+            path: '/api'
         });
 
         const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
@@ -602,41 +602,32 @@ router.post('/github/start', authLimiter, async (req, res) => {
 // @access  Public
 router.post('/github', async (req, res) => {
     try {
-        const { code, state, role: fallbackRole = 'freelancer' } = req.body;
+        const { code, state } = req.body;
         const binding = req.cookies?.oauthBinding;
 
-        let selectedRole = fallbackRole === 'client' ? 'client' : 'freelancer';
-
-        // Enforce Server-bound OAuthAttempt contract if state is provided or in strict mode
-        if (state) {
-            if (typeof code !== 'string' || !code ||
-                typeof state !== 'string' || !state ||
-                typeof binding !== 'string' || !binding) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Invalid OAuth attempt'
-                });
-            }
-
-            const attempt = await OAuthAttempt.findOneAndDelete({
-                stateHash: sha256(state),
-                browserHash: sha256(binding),
-                expiresAt: { $gt: new Date() }
+        if (typeof code !== 'string' || !code.trim() ||
+            typeof state !== 'string' || !state.trim() ||
+            typeof binding !== 'string' || !binding) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid OAuth attempt'
             });
-
-            if (!attempt) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'OAuth attempt expired or consumed'
-                });
-            }
-
-            selectedRole = attempt.role || selectedRole;
-        } else {
-            if (!code) {
-                return res.status(400).json({ success: false, message: 'Authorization code is required' });
-            }
         }
+
+        const attempt = await OAuthAttempt.findOneAndDelete({
+            stateHash: sha256(state),
+            browserHash: sha256(binding),
+            expiresAt: { $gt: new Date() }
+        });
+
+        if (!attempt) {
+            return res.status(400).json({
+                success: false,
+                message: 'OAuth attempt expired or already consumed'
+            });
+        }
+
+        const selectedRole = attempt.role;
 
         const clientId = process.env.GITHUB_CLIENT_ID;
         const clientSecret = process.env.GITHUB_CLIENT_SECRET;
@@ -1113,6 +1104,11 @@ router.put('/reset-password/:token', authLimiter, async (req, res) => {
         }, { returnDocument: 'after' });
         if (!changed) return fail(res, 400, 'Invalid or expired password reset link. Please request a new one.');
         await RefreshToken.deleteMany({ user: user._id });
+
+        const io = req.app.get('io');
+        if (io) {
+            io.in(String(user._id)).disconnectSockets(true);
+        }
 
         res.status(200).json({
             success: true,
