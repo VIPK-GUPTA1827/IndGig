@@ -854,8 +854,16 @@ router.post('/logout', async (req, res) => {
 // @route   POST /api/auth/logout-all
 // @access  Private
 router.post('/logout-all', protectSession, async (req, res) => {
+    const userId = req.user._id.toString();
     await RefreshToken.deleteMany({ user: req.user._id });
     await User.updateOne({ _id: req.user._id }, { $inc: { tokenVersion: 1 } });
+
+    // Disconnect any active sockets for this user room across instances
+    const io = req.app.get('io');
+    if (io) {
+        io.in(userId).disconnectSockets(true);
+    }
+
     clearAuthCookies(res);
     res.json({ success: true, message: 'Logged out everywhere' });
 });

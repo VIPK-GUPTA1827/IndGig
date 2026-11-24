@@ -31,7 +31,10 @@ function setupSocket(server) {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
       if (!isId(decoded.id)) return next(new Error('Invalid subject'));
+      if (!Number.isFinite(decoded.exp)) return next(new Error('Invalid token expiry'));
+
       socket.accessToken = token;
+      socket.expiresAt = decoded.exp * 1000;
       const user = await User.findById(decoded.id).select('_id role isSuspended tokenVersion isEmailVerified');
       if (!user || !user.isEmailVerified || user.isSuspended) {
         return next(new Error('Not allowed'));
@@ -50,6 +53,12 @@ function setupSocket(server) {
   io.on('connection', (socket) => {
     const userId = socket.user._id.toString();
     socket.join(userId);
+
+    // Disconnect idle socket automatically when access token expires
+    const expiryTimer = setTimeout(() => {
+      socket.emit('session_expired', { message: 'Refresh session' });
+      socket.disconnect(true);
+    }, Math.max(0, (socket.expiresAt || 0) - Date.now()));
 
     // Handshake auth is not enough: a long-lived connection must respect logout,
     // password reset, suspension and access-token expiry on its next event.
@@ -136,7 +145,10 @@ function setupSocket(server) {
       }
     });
 
-    socket.on('disconnect', () => clearInterval(timer));
+    socket.on('disconnect', () => {
+      clearTimeout(expiryTimer);
+      clearInterval(timer);
+    });
   });
 
   return io;

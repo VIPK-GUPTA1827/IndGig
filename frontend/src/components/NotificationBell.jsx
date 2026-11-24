@@ -68,6 +68,16 @@ export default function NotificationBell({ userRole = 'freelancer', onNavigateTo
     // Refetch on socket reconnect to reconcile missed messages
     socket.on('connect', fetchNotifications);
 
+    // Reconnect socket on session_expired notification if auth refresh recovers
+    socket.on('session_expired', async () => {
+      try {
+        await api.post('/api/auth/refresh');
+        socket.connect();
+      } catch (err) {
+        console.warn('Socket session expired, user logged out');
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
