@@ -69,8 +69,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   // GitHub Login function
-  const loginWithGitHub = async (code, role = 'freelancer') => {
-    const data = await api.post('/api/auth/github', { code, role });
+  const loginWithGitHub = async (code, role = 'freelancer', state = '') => {
+    const data = await api.post('/api/auth/github', { code, role, state });
     if (data.user) {
       setUser(data.user);
     }

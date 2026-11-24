@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
+const OAuthAttempt = require('../models/OAuthAttempt');
 const { sha256, sendAuthTokens, clearAuthCookies } = require('../utils/tokens');
 const EmailLog = require('../models/EmailLog');
 const { protect, protectSession, authorize, requireVerifiedEmail, optionalAuth } = require('../middleware/auth');
@@ -545,14 +546,95 @@ router.post('/google', async (req, res) => {
     }
 });
 
+// @desc    Initialize GitHub OAuth start with server-bound CSRF state and browser binding
+// @route   POST /api/auth/github/start
+// @access  Public
+router.post('/github/start', authLimiter, async (req, res) => {
+    try {
+        const { role = 'freelancer' } = req.body;
+        const validRole = role === 'client' ? 'client' : 'freelancer';
+
+        const clientId = process.env.GITHUB_CLIENT_ID;
+        if (!clientId) {
+            return res.status(500).json({ success: false, message: 'GitHub OAuth not configured on server' });
+        }
+
+        const state = crypto.randomBytes(32).toString('hex');
+        const browserBinding = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        await OAuthAttempt.create({
+            stateHash: sha256(state),
+            browserHash: sha256(browserBinding),
+            role: validRole,
+            expiresAt
+        });
+
+        const isProd = process.env.NODE_ENV === 'production';
+        res.cookie('oauthBinding', browserBinding, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? 'none' : 'lax',
+            maxAge: 10 * 60 * 1000,
+            path: '/api/auth'
+        });
+
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+        const redirectUri = `${clientUrl.replace(/\/$/, '')}/auth/github/callback`;
+        const authorizeUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+            redirectUri
+        )}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`;
+
+        res.json({
+            success: true,
+            state,
+            authorizeUrl
+        });
+    } catch (err) {
+        console.error('GitHub OAuth start error:', err);
+        res.status(500).json({ success: false, message: 'Failed to initiate GitHub OAuth' });
+    }
+});
+
 // @desc    Authenticate with GitHub OAuth
 // @route   POST /api/auth/github
 // @access  Public
 router.post('/github', async (req, res) => {
     try {
-        const { code, role = 'freelancer' } = req.body;
-        if (!code) {
-            return res.status(400).json({ success: false, message: 'Authorization code is required' });
+        const { code, state, role: fallbackRole = 'freelancer' } = req.body;
+        const binding = req.cookies?.oauthBinding;
+
+        let selectedRole = fallbackRole === 'client' ? 'client' : 'freelancer';
+
+        // Enforce Server-bound OAuthAttempt contract if state is provided or in strict mode
+        if (state) {
+            if (typeof code !== 'string' || !code ||
+                typeof state !== 'string' || !state ||
+                typeof binding !== 'string' || !binding) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid OAuth attempt'
+                });
+            }
+
+            const attempt = await OAuthAttempt.findOneAndDelete({
+                stateHash: sha256(state),
+                browserHash: sha256(binding),
+                expiresAt: { $gt: new Date() }
+            });
+
+            if (!attempt) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'OAuth attempt expired or consumed'
+                });
+            }
+
+            selectedRole = attempt.role || selectedRole;
+        } else {
+            if (!code) {
+                return res.status(400).json({ success: false, message: 'Authorization code is required' });
+            }
         }
 
         const clientId = process.env.GITHUB_CLIENT_ID;
@@ -664,7 +746,7 @@ router.post('/github', async (req, res) => {
             if (user.authProvider === 'local') user.authProvider = 'github';
             await user.save();
         } else {
-            const assignedRole = role === 'client' ? 'client' : 'freelancer';
+            const assignedRole = selectedRole;
             const baseUsername = (ghProfile.login || primaryEmail.split('@')[0]).toLowerCase().replace(/[^a-z0-9]/g, '_');
             const displayUsername = `${baseUsername}_${Math.floor(1000 + Math.random() * 9000)}`;
 

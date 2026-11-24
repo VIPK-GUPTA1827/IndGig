@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import api from '../utils/api';
 
 export default function GitHubAuthButton({ role = 'freelancer', text = 'Continue with GitHub' }) {
   const [loading, setLoading] = useState(false);
@@ -13,26 +14,35 @@ export default function GitHubAuthButton({ role = 'freelancer', text = 'Continue
     return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
-  const handleGitHubClick = () => {
+  const handleGitHubClick = async () => {
     setLoading(true);
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liZZpDhO5VgvOXXH';
-    const redirectUri = `${window.location.origin}/auth/github/callback`;
-    
-    // Save chosen role in sessionStorage so callback page knows whether client or freelancer
-    sessionStorage.setItem('oauth_role', role);
+    try {
+      // 1. Initiate server-bound OAuth start to get cryptographically secure state & authorizeUrl
+      const startRes = await api.post('/api/auth/github/start', { role });
+      if (startRes && startRes.success && startRes.authorizeUrl) {
+        sessionStorage.setItem('oauth_role', role);
+        sessionStorage.setItem('oauth_state', startRes.state);
+        window.location.href = startRes.authorizeUrl;
+        return;
+      }
+      throw new Error(startRes?.message || 'Failed to start GitHub authorization');
+    } catch (err) {
+      // Fallback to client-generated state if start endpoint unavailable
+      console.warn('Server OAuth start fallback:', err.message);
+      const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liZZpDhO5VgvOXXH';
+      const redirectUri = `${window.location.origin}/auth/github/callback`;
+      sessionStorage.setItem('oauth_role', role);
+      const state = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      sessionStorage.setItem('oauth_state', state);
 
-    // Generate and store cryptographically secure state for CSRF protection
-    const state = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : Math.random().toString(36).substring(2) + Date.now().toString(36);
-    sessionStorage.setItem('oauth_state', state);
+      const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+        redirectUri
+      )}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`;
 
-    // GitHub OAuth URL with user, user:email scope and state parameter
-    const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&scope=read:user%20user:email&state=${encodeURIComponent(state)}`;
-
-    window.location.href = githubUrl;
+      window.location.href = githubUrl;
+    }
   };
 
   return (

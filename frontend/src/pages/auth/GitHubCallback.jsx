@@ -28,7 +28,7 @@ export default function GitHubCallback() {
 
     async function exchangeCode() {
       try {
-        const res = await loginWithGitHub(code, role);
+        const res = await loginWithGitHub(code, role, returnedState);
         if (res && res.user) {
           if (res.user.role === 'client') {
             navigate('/client/dashboard', { replace: true });
