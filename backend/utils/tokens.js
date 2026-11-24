@@ -24,24 +24,33 @@ const signAccessToken = (user) => jwt.sign(
   { expiresIn: '15m' }
 );
 
-async function issueRefreshToken(user, req) {
+async function issueRefreshToken(user, req, session = null) {
   const raw = crypto.randomBytes(48).toString('hex');
-  await RefreshToken.create({
+  const record = {
     user: user._id,
     tokenVersion: user.tokenVersion || 0,
     tokenHash: sha256(raw),
     expiresAt: new Date(Date.now() + REFRESH_MS),
     userAgent: (req.get('user-agent') || '').slice(0, 200)
-  });
+  };
+  if (session) {
+    await RefreshToken.create([record], { session });
+  } else {
+    await RefreshToken.create(record);
+  }
   return raw;
+}
+
+function writeAuthCookies(res, accessToken, refreshToken) {
+  res.cookie('token', accessToken, { ...cookieBase(), maxAge: ACCESS_MS });
+  res.cookie('refreshToken', refreshToken, { ...cookieBase(), maxAge: REFRESH_MS, path: '/api' });
 }
 
 async function sendAuthTokens(req, res, user) {
   const accessToken = signAccessToken(user);
   const refreshToken = await issueRefreshToken(user, req);
 
-  res.cookie('token', accessToken, { ...cookieBase(), maxAge: ACCESS_MS });
-  res.cookie('refreshToken', refreshToken, { ...cookieBase(), maxAge: REFRESH_MS, path: '/api' });
+  writeAuthCookies(res, accessToken, refreshToken);
 
   return isMobile(req)
     ? { token: accessToken, refreshToken }
@@ -57,6 +66,8 @@ module.exports = {
   sha256,
   isMobile,
   sendAuthTokens,
+  writeAuthCookies,
   clearAuthCookies,
-  signAccessToken
+  signAccessToken,
+  issueRefreshToken
 };

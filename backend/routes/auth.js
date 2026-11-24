@@ -7,7 +7,8 @@ const nodemailer = require('nodemailer');
 const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
 const OAuthAttempt = require('../models/OAuthAttempt');
-const { sha256, sendAuthTokens, clearAuthCookies } = require('../utils/tokens');
+const { sha256, sendAuthTokens, writeAuthCookies, clearAuthCookies, signAccessToken, issueRefreshToken, isMobile } = require('../utils/tokens');
+const withTransaction = require('../utils/withTransaction');
 const EmailLog = require('../models/EmailLog');
 const { protect, protectSession, authorize, requireVerifiedEmail, optionalAuth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
@@ -789,31 +790,52 @@ router.post('/refresh', async (req, res) => {
         });
     }
 
-    // Rotation: purana token ek hi baar chalega
-    const stored = await RefreshToken.findOneAndDelete({
-        tokenHash: sha256(raw),
-        expiresAt: { $gt: new Date() }
-    });
+    try {
+        // Atomic rotation: consume old token & persist replacement inside one transaction
+        const result = await withTransaction(async (session) => {
+            const stored = await RefreshToken.findOneAndDelete({
+                tokenHash: sha256(raw),
+                expiresAt: { $gt: new Date() }
+            }).session(session);
 
-    if (!stored) {
-        clearAuthCookies(res);
-        return res.status(401).json({
-            success: false,
-            message: 'Session expired, please log in'
+            if (!stored) {
+                const err = new Error('Session expired, please log in');
+                err.statusCode = 401;
+                throw err;
+            }
+
+            const user = await User.findById(stored.user).session(session);
+            if (!user || !user.isEmailVerified || user.isSuspended || (stored.tokenVersion || 0) !== (user.tokenVersion || 0)) {
+                const err = new Error('Not allowed');
+                err.statusCode = 401;
+                throw err;
+            }
+
+            const accessToken = signAccessToken(user);
+            const refreshToken = await issueRefreshToken(user, req, session);
+
+            return { accessToken, refreshToken };
         });
-    }
 
-    const user = await User.findById(stored.user);
-    if (!user || !user.isEmailVerified || user.isSuspended || (stored.tokenVersion || 0) !== (user.tokenVersion || 0)) {
-        clearAuthCookies(res);
-        return res.status(401).json({
-            success: false,
-            message: 'Not allowed'
+        // Set response cookies ONLY after transaction commit succeeds
+        writeAuthCookies(res, result.accessToken, result.refreshToken);
+
+        res.json({
+            success: true,
+            token: result.accessToken,
+            ...(isMobile(req) ? { refreshToken: result.refreshToken } : {})
         });
+    } catch (err) {
+        if (err.statusCode === 401) {
+            clearAuthCookies(res);
+            return res.status(401).json({
+                success: false,
+                message: err.message || 'Session expired, please log in'
+            });
+        }
+        console.error('Refresh token transaction error:', err);
+        res.status(500).json({ success: false, message: 'Server error during session refresh' });
     }
-
-    const tokens = await sendAuthTokens(req, res, user);
-    res.json({ success: true, ...tokens });
 });
 
 // @desc    Logout user & clear cookies
