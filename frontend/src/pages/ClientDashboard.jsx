@@ -388,7 +388,10 @@ export default function ClientDashboard() {
     setActionLoadingId(gigId);
     setErrorMsg('');
     try {
-      const data = await api.put(`/api/gigs/${gigId}`, { status: newStatus });
+      const data = await api.patch(`/api/gigs/${gigId}/status`, {
+        expectedStatus: currentGig.status,
+        status: newStatus
+      });
       if (!data.success) throw new Error(data.message || `Failed to update status to ${newStatus}`);
       
       const statusLabels = {
