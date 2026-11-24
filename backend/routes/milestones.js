@@ -39,9 +39,16 @@ router.post('/', protect, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Please provide a milestone title' });
         }
 
-        const parsedBudget = Number(budget !== undefined ? budget : amount);
-        if (isNaN(parsedBudget) || parsedBudget < 0) {
-            return res.status(400).json({ success: false, message: 'Please provide a valid milestone budget' });
+        const rawAmount = budget !== undefined ? budget : amount;
+        const parsedBudget = Number(rawAmount);
+        const validInputType = typeof rawAmount === 'number' ||
+            (typeof rawAmount === 'string' && rawAmount.trim() !== '');
+
+        if (!validInputType || !Number.isSafeInteger(parsedBudget) || parsedBudget <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Use a positive whole-rupee milestone amount'
+            });
         }
 
         const newMilestone = {

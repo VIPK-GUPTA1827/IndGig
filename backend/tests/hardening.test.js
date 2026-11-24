@@ -126,6 +126,17 @@ describe('Backend hardening regressions', () => {
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Each milestone is required once');
   });
+  it('rejects invalid milestone amounts on creation', async () => {
+    const { client, gig } = await makeContract();
+    for (const amount of [0, -1, 1.5, '', null, true]) {
+      const res = await request(app)
+        .post(`/api/gigs/${gig._id}/milestones`)
+        .set(client.authHeader)
+        .send({ title: 'Delivery', amount });
+      expect(res.status).toBe(400);
+      expect(res.body.message).toBe('Use a positive whole-rupee milestone amount');
+    }
+  });
   it('rejects negative and non-finite internal wallet mutations', async () => {
     const { user } = await makeUser({ walletBalance: 100 });
     const { credit, debit } = require('../utils/wallet');
