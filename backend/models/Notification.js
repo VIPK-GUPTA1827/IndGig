@@ -30,7 +30,8 @@ const NotificationSchema = new mongoose.Schema({
       'booking_request',
       'booking_update',
       'invite_received',
-      'invite_accepted'
+      'invite_accepted',
+      'saved_search_alert'
     ],
     required: true
   },

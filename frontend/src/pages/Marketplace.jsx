@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, ArrowLeft, MapPin, Clock, Briefcase, RefreshCw, X } from 'lucide-react';
+import { Search, ArrowLeft, MapPin, Clock, Briefcase, RefreshCw, X, Bell } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { SkeletonGrid } from '../components/Skeleton';
 import Seo from '../components/Seo';
 
@@ -23,6 +24,8 @@ const formatINR = (n) =>
 
 export default function Marketplace() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [savingSearch, setSavingSearch] = useState(false);
   const backUrl = user
     ? user.role === 'client'
       ? '/client/dashboard'
@@ -66,6 +69,30 @@ export default function Marketplace() {
   };
 
   const hasActiveFilters = Boolean(search || category !== 'All' || minBudget || maxBudget || page > 1 || sort !== 'newest');
+
+  const handleSaveSearch = async () => {
+    if (!user) return;
+    setSavingSearch(true);
+    try {
+      const label = [search, category !== 'All' ? category : ''].filter(Boolean).join(' · ') || 'All open projects';
+      await api.post('/api/saved-searches', {
+        name: label,
+        type: 'projects',
+        frequency: 'instant',
+        filters: {
+          search,
+          category: category !== 'All' ? category : '',
+          minBudget: minBudget ? Number(minBudget) : null,
+          maxBudget: maxBudget ? Number(maxBudget) : null
+        }
+      });
+      toast?.success('Search saved! You will get matching alerts.');
+    } catch (err) {
+      toast?.error(err.message || 'Could not save search');
+    } finally {
+      setSavingSearch(false);
+    }
+  };
 
   useEffect(() => {
     setSearchInput(search);
@@ -194,6 +221,25 @@ export default function Marketplace() {
                 <option value="budget_desc">Highest Budget</option>
                 <option value="budget_asc">Lowest Budget</option>
               </select>
+              {user && (
+                <>
+                  <button
+                    type="button"
+                    disabled={savingSearch}
+                    onClick={handleSaveSearch}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#2F6FAB] text-[#2F6FAB] text-xs font-bold hover:bg-[#EAF1F7] transition cursor-pointer disabled:opacity-50"
+                  >
+                    <Bell className="w-3.5 h-3.5" />
+                    {savingSearch ? 'Saving...' : 'Save search'}
+                  </button>
+                  <Link
+                    to="/saved-searches"
+                    className="inline-flex items-center px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Alerts
+                  </Link>
+                </>
+              )}
             </div>
           </form>
 

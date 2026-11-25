@@ -17,6 +17,7 @@ const { createGigSchema } = require('../validators/gig');
 const { getPagination } = require('../utils/paginate');
 const { cacheMiddleware, clearCache } = require('../config/redis');
 const { createGigInvite } = require('./invites');
+const { dispatchInstantAlertsForGig } = require('../utils/savedSearchMatcher');
 
 const router = express.Router();
 
@@ -145,6 +146,10 @@ router.post('/', createGigLimiter, protect, authorize('client', 'admin'), requir
             } catch (notifErr) {
                 console.error('Failed to dispatch new gig notifications:', notifErr.message);
             }
+
+            dispatchInstantAlertsForGig(req.app, gig).catch((err) => {
+                console.error('Failed to dispatch saved search alerts:', err.message);
+            });
         }
 
         res.status(201).json({ 
@@ -706,6 +711,12 @@ router.patch('/:id/status', protect, authorize('client', 'admin'), async (req, r
 
         await clearCache('cache:/api/gigs').catch(() => {});
         await clearCache('cache:/api/v1/gigs').catch(() => {});
+
+        if (status === 'open') {
+            dispatchInstantAlertsForGig(req.app, gig).catch((err) => {
+                console.error('Failed to dispatch saved search alerts:', err.message);
+            });
+        }
 
         res.json({ success: true, data: gig });
     } catch (error) {
