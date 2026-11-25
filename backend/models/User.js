@@ -205,6 +205,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    verification: {
+        identityStatus: { type: String, enum: ['pending', 'approved', 'revoked'], default: 'pending' },
+        technicalStatus: { type: String, enum: ['pending', 'approved', 'revoked'], default: 'pending' },
+        reviewedAt: { type: Date, default: null },
+        validUntil: { type: Date, default: null }
+    },
     profileViews: {
         type: Number,
         default: 0
@@ -217,6 +223,10 @@ const userSchema = new mongoose.Schema({
         {
             title: { type: String, required: true },
             description: { type: String },
+            problem: { type: String, default: '' },
+            contribution: { type: String, default: '' },
+            result: { type: String, default: '' },
+            techStack: [{ type: String }],
             projectUrl: { type: String },
             link: { type: String },
             githubUrl: { type: String },

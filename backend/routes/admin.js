@@ -118,13 +118,39 @@ router.put('/users/:id/verify', protect, adminOnly, async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        user.verificationBadge = !user.verificationBadge;
+        const { identityStatus, technicalStatus, validUntil } = req.body || {};
+        if (identityStatus || technicalStatus || validUntil !== undefined) {
+            user.verification = user.verification || {};
+            if (['pending', 'approved', 'revoked'].includes(identityStatus)) {
+                user.verification.identityStatus = identityStatus;
+            }
+            if (['pending', 'approved', 'revoked'].includes(technicalStatus)) {
+                user.verification.technicalStatus = technicalStatus;
+            }
+            user.verification.reviewedAt = new Date();
+            user.verification.validUntil = validUntil ? new Date(validUntil) : null;
+            const notExpired = !user.verification.validUntil || user.verification.validUntil > new Date();
+            user.verificationBadge = notExpired && (
+                user.verification.technicalStatus === 'approved' || user.verification.identityStatus === 'approved'
+            );
+        } else {
+            user.verificationBadge = !user.verificationBadge;
+            user.verification = {
+                ...(user.verification || {}),
+                technicalStatus: user.verificationBadge ? 'approved' : 'revoked',
+                reviewedAt: new Date()
+            };
+        }
         await user.save();
 
         res.status(200).json({
             success: true,
             message: `User verification badge set to ${user.verificationBadge}`,
-            data: { _id: user._id, verificationBadge: user.verificationBadge }
+            data: {
+                _id: user._id,
+                verificationBadge: user.verificationBadge,
+                verification: user.verification
+            }
         });
     } catch (error) {
         return next(error);

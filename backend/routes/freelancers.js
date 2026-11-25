@@ -19,6 +19,7 @@ const PUBLIC_FREELANCER_SELECT = [
   'weeklyCapacity',
   'availabilityStatus',
   'verificationBadge',
+  'verification',
   'createdAt'
 ].join(' ');
 
@@ -98,9 +99,20 @@ router.get('/', async (req, res, next) => {
       User.countDocuments(filter)
     ]);
 
+    const now = new Date();
+    const sanitized = data.map((dev) => {
+      const v = dev.verification || {};
+      const expired = v.validUntil && new Date(v.validUntil) <= now;
+      const revoked = v.technicalStatus === 'revoked' && v.identityStatus !== 'approved';
+      return {
+        ...dev,
+        verificationBadge: Boolean(dev.verificationBadge && !expired && !revoked)
+      };
+    });
+
     res.json({
       success: true,
-      data,
+      data: sanitized,
       totalCount,
       totalPages: Math.max(1, Math.ceil(totalCount / limit)),
       page

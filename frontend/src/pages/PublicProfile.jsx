@@ -418,11 +418,20 @@ export default function PublicProfile() {
                           <p className="text-xs text-slate-600 line-clamp-3">
                             {item.description || 'No description provided.'}
                           </p>
+                          {item.problem && (
+                            <p className="text-[11px] text-slate-600"><strong className="text-slate-800">Problem:</strong> {item.problem}</p>
+                          )}
+                          {item.contribution && (
+                            <p className="text-[11px] text-slate-600"><strong className="text-slate-800">Contribution:</strong> {item.contribution}</p>
+                          )}
+                          {item.result && (
+                            <p className="text-[11px] text-emerald-700 font-medium"><strong className="text-slate-800">Result:</strong> {item.result}</p>
+                          )}
                         </div>
 
-                        {item.tags && item.tags.length > 0 && (
+                        {(item.techStack?.length > 0 || item.tags?.length > 0) && (
                           <div className="flex flex-wrap gap-1">
-                            {item.tags.map((tag, tIdx) => (
+                            {(item.techStack?.length > 0 ? item.techStack : item.tags).map((tag, tIdx) => (
                               <span key={tIdx} className="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">
                                 {tag}
                               </span>
