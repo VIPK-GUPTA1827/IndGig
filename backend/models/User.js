@@ -211,6 +211,10 @@ const userSchema = new mongoose.Schema({
         reviewedAt: { type: Date, default: null },
         validUntil: { type: Date, default: null }
     },
+    plan: {
+        tier: { type: String, enum: ['free', 'pro'], default: 'free' },
+        expiresAt: { type: Date, default: null }
+    },
     profileViews: {
         type: Number,
         default: 0

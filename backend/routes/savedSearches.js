@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const SavedSearch = require('../models/SavedSearch');
 const { protect } = require('../middleware/auth');
+const { getEffectivePlan } = require('../config/plans');
 
 const router = express.Router();
 
@@ -41,6 +42,17 @@ router.post('/', protect, async (req, res, next) => {
     }
     if (!VALID_FREQUENCIES.has(frequency)) {
       return res.status(400).json({ success: false, message: 'Invalid alert frequency' });
+    }
+
+    const { entitlements } = getEffectivePlan(req.user);
+    const currentCount = await SavedSearch.countDocuments({ owner: req.user._id });
+    if (currentCount >= entitlements.savedSearchLimit) {
+      return res.status(403).json({
+        success: false,
+        code: 'QUOTA_EXCEEDED',
+        message: `Saved search limit (${entitlements.savedSearchLimit}) reached for your current plan`,
+        limit: entitlements.savedSearchLimit
+      });
     }
 
     const doc = await SavedSearch.create({

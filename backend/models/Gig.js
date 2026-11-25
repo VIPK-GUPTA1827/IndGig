@@ -30,6 +30,10 @@ const gigSchema = new mongoose.Schema({
         ref: 'Organization',
         default: null
     },
+    isFeatured: {
+        type: Boolean,
+        default: false
+    },
     freelancer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

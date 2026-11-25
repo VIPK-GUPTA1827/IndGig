@@ -6,6 +6,7 @@ const Membership = require('../models/Membership');
 const OrgInvite = require('../models/OrgInvite');
 const Gig = require('../models/Gig');
 const { protect, authorize } = require('../middleware/auth');
+const { getEffectivePlan } = require('../config/plans');
 
 const router = express.Router();
 const sha256 = (v) => crypto.createHash('sha256').update(String(v)).digest('hex');
@@ -92,6 +93,17 @@ router.post('/:id/invites', protect, async (req, res, next) => {
     }
     if (!['recruiter', 'reviewer'].includes(role)) {
       return res.status(400).json({ success: false, message: 'Role must be recruiter or reviewer' });
+    }
+
+    const { entitlements } = getEffectivePlan(req.user);
+    const activeCount = await Membership.countDocuments({ organization: req.params.id, status: 'active' });
+    if (activeCount >= entitlements.teamSeatLimit) {
+      return res.status(403).json({
+        success: false,
+        code: 'SEAT_LIMIT_EXCEEDED',
+        message: `Team seat limit (${entitlements.teamSeatLimit}) reached for your current plan`,
+        limit: entitlements.teamSeatLimit
+      });
     }
 
     const rawToken = crypto.randomBytes(24).toString('hex');

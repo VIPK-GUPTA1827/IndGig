@@ -38,6 +38,7 @@ api.use('/shortlists', require('./routes/shortlists'));
 api.use('/invites', require('./routes/invites'));
 api.use('/saved-searches', require('./routes/savedSearches'));
 api.use('/organizations', require('./routes/organizations'));
+api.use('/plans', require('./routes/plans'));
 api.use('/upload', require('./routes/upload'));
 
 api.get('/health', (req, res) => {
