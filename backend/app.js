@@ -33,6 +33,7 @@ api.use('/bookings', require('./routes/bookings'));
 api.use('/disputes', require('./routes/disputes'));
 api.use('/analytics', require('./routes/analytics'));
 api.use('/freelancer', require('./routes/freelancer'));
+api.use('/freelancers', require('./routes/freelancers'));
 api.use('/upload', require('./routes/upload'));
 
 api.get('/health', (req, res) => {

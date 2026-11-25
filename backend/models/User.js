@@ -181,6 +181,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'Flexible'
     },
+    availabilityStatus: {
+        type: String,
+        enum: ['available', 'limited', 'unavailable'],
+        default: 'available'
+    },
+    availableFrom: {
+        type: Date,
+        default: null
+    },
+    isDiscoverable: {
+        type: Boolean,
+        default: true
+    },
     availabilitySlots: [
         {
             dayOfWeek: { type: String, required: true },

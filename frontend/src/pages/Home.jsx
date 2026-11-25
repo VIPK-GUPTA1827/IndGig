@@ -35,6 +35,7 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTarget, setSearchTarget] = useState('projects');
   const [featuredGigs, setFeaturedGigs] = useState([]);
 
   useEffect(() => {
@@ -58,10 +59,11 @@ export default function Home() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
+    const base = searchTarget === 'developers' ? '/freelancers' : '/marketplace';
     if (searchQuery.trim()) {
-      navigate(`/marketplace?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`${base}?search=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      navigate('/marketplace');
+      navigate(base);
     }
   };
 
@@ -87,14 +89,14 @@ export default function Home() {
 
             {/* Desktop Navigation Links */}
             <div className="hidden lg:flex items-center gap-6 xl:gap-8 text-[14px] font-semibold text-[#5A6675]">
+              <Link to="/freelancers" className="hover:text-[#2F6FAB] transition-colors py-1">
+                Find Developers
+              </Link>
+              <Link to="/marketplace" className="hover:text-[#2F6FAB] transition-colors py-1">
+                Find Projects
+              </Link>
               <a href="#how-it-works" className="hover:text-[#2F6FAB] transition-colors py-1">
                 How It Works
-              </a>
-              <a href="#categories" className="hover:text-[#2F6FAB] transition-colors py-1">
-                Tech Services
-              </a>
-              <a href="#choose-path" className="hover:text-[#2F6FAB] transition-colors py-1">
-                Clients &amp; Devs
               </a>
               <a href="#faq" className="hover:text-[#2F6FAB] transition-colors py-1">
                 FAQ
@@ -134,6 +136,20 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               className="lg:hidden w-full mt-2 rounded-2xl bg-white border border-[#DDE5ED] shadow-lg p-4 space-y-2 text-sm font-semibold text-[#243040]"
             >
+              <Link 
+                to="/freelancers" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-xl hover:bg-[#EAF1F7] transition-colors"
+              >
+                Find Developers
+              </Link>
+              <Link 
+                to="/marketplace" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2.5 rounded-xl hover:bg-[#EAF1F7] transition-colors"
+              >
+                Find Projects
+              </Link>
               <a 
                 href="#how-it-works" 
                 onClick={() => setMobileMenuOpen(false)}
@@ -242,21 +258,37 @@ export default function Home() {
               </div>
 
               {/* Search Bar Input */}
-              <form onSubmit={handleSearchSubmit} className="relative w-full">
+              <form onSubmit={handleSearchSubmit} className="relative w-full space-y-2">
+                <div className="inline-flex rounded-full bg-white border border-[#DDE5ED] p-1 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setSearchTarget('projects')}
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${searchTarget === 'projects' ? 'bg-[#243040] text-white' : 'text-[#5A6675] hover:text-[#243040]'}`}
+                  >
+                    Projects
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSearchTarget('developers')}
+                    className={`px-3 py-1 rounded-full transition-colors cursor-pointer ${searchTarget === 'developers' ? 'bg-[#243040] text-white' : 'text-[#5A6675] hover:text-[#243040]'}`}
+                  >
+                    Developers
+                  </button>
+                </div>
                 <div className="flex items-center bg-white border border-[#DDE5ED] rounded-full p-2 shadow-xs focus-within:border-[#2F6FAB] focus-within:ring-2 focus-within:ring-[#2F6FAB]/15 transition-all">
                   <Search className="w-4 h-4 text-[#5A6675] ml-3.5 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="What skill are you looking for?"
+                    placeholder={searchTarget === 'developers' ? 'Search React, Node.js, Python devs...' : 'What skill are you looking for?'}
                     className="w-full bg-transparent px-3 py-2 text-sm text-[#243040] placeholder-[#5A6675]/70 focus:outline-hidden"
                   />
                   <button
                     type="submit"
                     className="rounded-full bg-[#F2A541] hover:bg-[#D9943A] text-[#243040] px-6 py-2.5 text-xs sm:text-sm font-bold transition-colors cursor-pointer shrink-0"
                   >
-                    Browse Gigs
+                    {searchTarget === 'developers' ? 'Find Devs' : 'Browse Gigs'}
                   </button>
                 </div>
               </form>

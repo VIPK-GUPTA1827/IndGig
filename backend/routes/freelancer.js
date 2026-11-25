@@ -69,6 +69,8 @@ router.get('/profile', protect, authorize('freelancer', 'admin'), async (req, re
                 socialLinks: user.socialLinks || {},
                 languages: user.languages || [],
                 weeklyCapacity: user.weeklyCapacity || '30+ hrs/week',
+                availabilityStatus: user.availabilityStatus || 'available',
+                isDiscoverable: user.isDiscoverable !== false,
                 isProfileComplete: Boolean(user.isProfileComplete),
                 hasSkippedOnboarding: Boolean(user.hasSkippedOnboarding),
                 isEmailVerified: Boolean(user.isEmailVerified),
@@ -174,6 +176,14 @@ router.put('/profile', protect, authorize('freelancer', 'admin'), async (req, re
 
         if (req.body.weeklyCapacity && typeof req.body.weeklyCapacity === 'string') {
             user.weeklyCapacity = req.body.weeklyCapacity.trim();
+        }
+
+        if (['available', 'limited', 'unavailable'].includes(req.body.availabilityStatus)) {
+            user.availabilityStatus = req.body.availabilityStatus;
+        }
+
+        if (req.body.isDiscoverable !== undefined) {
+            user.isDiscoverable = Boolean(req.body.isDiscoverable);
         }
 
         if (req.body.languages && Array.isArray(req.body.languages)) {

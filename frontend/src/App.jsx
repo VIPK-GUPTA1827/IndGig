@@ -25,6 +25,7 @@ const FreelancerSetupWizard = lazy(() => import('./pages/FreelancerSetupWizard')
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const GitHubCallback = lazy(() => import('./pages/auth/GitHubCallback'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
+const FreelancerDirectory = lazy(() => import('./pages/FreelancerDirectory'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
 const Maintenance = lazy(() => import('./pages/Maintenance'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -88,6 +89,7 @@ function App() {
                       <Route path="/profile" element={<PublicProfile />} />
                       <Route path="/profile/me" element={<PublicProfile />} />
                       <Route path="/marketplace" element={<Marketplace />} />
+                      <Route path="/freelancers" element={<FreelancerDirectory />} />
                       <Route path="/gigs" element={<Marketplace />} />
                       <Route path="/gigs/:id" element={<GigDetail />} />
                       <Route path="/jobs" element={<Marketplace />} />
