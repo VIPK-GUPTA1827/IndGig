@@ -28,7 +28,9 @@ const NotificationSchema = new mongoose.Schema({
       'dispute_filed',
       'dispute_resolved',
       'booking_request',
-      'booking_update'
+      'booking_update',
+      'invite_received',
+      'invite_accepted'
     ],
     required: true
   },

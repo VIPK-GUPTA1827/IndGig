@@ -6,6 +6,7 @@ import { useModalDismiss } from '../hooks/useModalDismiss';
 import api from '../utils/api';
 import NotificationBell from '../components/NotificationBell';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import InviteToProjectDialog from '../components/InviteToProjectDialog';
 import { Button, Card, StatCard, PageHeader, BarChart } from '../components/ui';
 import { 
   Briefcase, 
@@ -69,6 +70,8 @@ export default function ClientDashboard() {
   const [projectStatusFilter, setProjectStatusFilter] = useState('all'); // 'all' | 'open' | 'draft' | 'paused' | 'closed'
   const [myGigs, setMyGigs] = useState([]);
   const [proposals, setProposals] = useState([]);
+  const [shortlists, setShortlists] = useState([]);
+  const [inviteTarget, setInviteTarget] = useState(null);
   const [loadingData, setLoadingData] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -133,6 +136,16 @@ export default function ClientDashboard() {
       const propData = await api.get('/api/proposals/client/all-proposals');
       if (propData.success) {
         setProposals(propData.data || []);
+      }
+
+      // 3. Fetch Shortlisted Freelancers
+      try {
+        const shortlistRes = await api.get('/api/shortlists');
+        if (shortlistRes.success) {
+          setShortlists(shortlistRes.data || []);
+        }
+      } catch (sErr) {
+        console.warn('Could not load shortlists:', sErr);
       }
     } catch (err) {
       console.error('Failed to load client data:', err);
@@ -560,6 +573,7 @@ export default function ClientDashboard() {
   const clientNav = [
     { key: 'projects', label: 'My gigs', icon: Layers, active: activeTab === 'projects', onClick: () => setActiveTab('projects') },
     { key: 'proposals', label: 'Proposals', icon: Users, active: activeTab === 'proposals', onClick: () => setActiveTab('proposals') },
+    { key: 'shortlist', label: 'Shortlisted', icon: ShieldCheck, active: activeTab === 'shortlist', onClick: () => setActiveTab('shortlist') },
     { key: 'profile', label: 'Company', icon: Building2, active: activeTab === 'profile', onClick: () => setActiveTab('profile') },
   ];
 
@@ -681,6 +695,18 @@ export default function ClientDashboard() {
             >
               <Users className="w-4 h-4" />
               <span>Applicant Proposals ({realProposals.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('shortlist')}
+              className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition cursor-pointer ${
+                activeTab === 'shortlist'
+                  ? 'border-[#2F6FAB] text-[#2F6FAB]'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Shortlisted ({shortlists.length})</span>
             </button>
 
             <button
@@ -1339,6 +1365,93 @@ export default function ClientDashboard() {
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Tab: Shortlisted Developers */}
+        {activeTab === 'shortlist' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-500">Compare saved developers and invite them to your open projects.</p>
+              <Link to="/freelancers" className="text-xs font-bold text-[#2F6FAB] hover:underline">
+                Browse Developer Directory →
+              </Link>
+            </div>
+            {shortlists.length === 0 ? (
+              <div className="bg-white p-8 rounded-3xl border border-slate-200/90 text-center">
+                <p className="text-sm font-bold text-slate-800">No shortlisted developers yet</p>
+                <p className="text-xs text-slate-500 mt-1 mb-4">Save developers from the directory to compare rates and invite them.</p>
+                <Link to="/freelancers" className="inline-block px-4 py-2 rounded-xl bg-[#2F6FAB] text-white text-xs font-bold">
+                  Find Developers
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {shortlists.map((entry) => {
+                  const dev = entry.freelancer;
+                  if (!dev) return null;
+                  return (
+                    <div key={entry._id} className="bg-white p-5 rounded-2xl border border-slate-200/90 flex flex-col justify-between gap-4">
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <Link to={`/profile/${dev._id}`} className="text-sm font-bold text-slate-900 hover:text-[#2F6FAB]">
+                              {dev.name || dev.username}
+                            </Link>
+                            <p className="text-xs text-slate-500">{dev.headline || 'Developer'}</p>
+                          </div>
+                          <span className="text-xs font-bold text-slate-800">
+                            {dev.hourlyRate > 0 ? `₹${dev.hourlyRate}/hr` : 'Negotiable'}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {(dev.skills || []).slice(0, 4).map((s, idx) => (
+                            <span key={idx} className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">
+                              {typeof s === 'string' ? s : s.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                        <span className="text-[11px] text-slate-500 capitalize">
+                          {dev.workPreference || 'remote'} · {dev.availabilityStatus || 'available'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await api.delete(`/api/shortlists/${entry._id}`);
+                                setShortlists((prev) => prev.filter((item) => item._id !== entry._id));
+                              } catch (err) {
+                                toast?.error(err.message || 'Could not remove');
+                              }
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setInviteTarget(dev)}
+                            className="px-3 py-1.5 rounded-lg bg-[#2F6FAB] text-white text-xs font-bold cursor-pointer"
+                          >
+                            Invite to Project
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <InviteToProjectDialog
+              isOpen={Boolean(inviteTarget)}
+              onClose={() => setInviteTarget(null)}
+              freelancer={inviteTarget}
+              clientId={user?._id}
+              onInvited={(res) => toast?.success(res?.duplicate ? 'Already invited to this project' : 'Invitation sent!')}
+            />
           </div>
         )}
 

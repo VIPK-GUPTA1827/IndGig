@@ -16,6 +16,7 @@ const validate = require('../middleware/validate');
 const { createGigSchema } = require('../validators/gig');
 const { getPagination } = require('../utils/paginate');
 const { cacheMiddleware, clearCache } = require('../config/redis');
+const { createGigInvite } = require('./invites');
 
 const router = express.Router();
 
@@ -864,5 +865,7 @@ router.get('/:id/recommendations', protect, async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+router.post('/:id/invites', ...createGigInvite);
 
 module.exports = router;

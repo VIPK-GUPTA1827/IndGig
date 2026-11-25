@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, ArrowLeft, MapPin, Clock, CheckCircle2, RefreshCw, SlidersHorizontal, X } from 'lucide-react';
+import { Search, ArrowLeft, MapPin, Clock, CheckCircle2, RefreshCw, SlidersHorizontal, X, Bookmark, Send } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { SkeletonGrid } from '../components/Skeleton';
 import Seo from '../components/Seo';
+import InviteToProjectDialog from '../components/InviteToProjectDialog';
 
 const AVAILABILITY_LABELS = {
   available: { text: 'Available now', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
@@ -17,6 +19,9 @@ const formatINR = (n) =>
 
 export default function FreelancerDirectory() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [shortlistMap, setShortlistMap] = useState({});
+  const [inviteTarget, setInviteTarget] = useState(null);
   const backUrl = user
     ? user.role === 'client'
       ? '/client/dashboard'
@@ -42,6 +47,41 @@ export default function FreelancerDirectory() {
 
   const [searchInput, setSearchInput] = useState(search);
   const [maxRateInput, setMaxRateInput] = useState(maxRate);
+
+  useEffect(() => {
+    if (user?.role !== 'client') return;
+    api.get('/api/shortlists')
+      .then((res) => {
+        const next = {};
+        for (const item of res.data || []) {
+          if (item.freelancer?._id) next[item.freelancer._id] = item._id;
+        }
+        setShortlistMap(next);
+      })
+      .catch(() => {});
+  }, [user?._id, user?.role]);
+
+  const handleToggleShortlist = async (devId) => {
+    try {
+      if (shortlistMap[devId]) {
+        await api.delete(`/api/shortlists/${shortlistMap[devId]}`);
+        setShortlistMap((prev) => {
+          const copy = { ...prev };
+          delete copy[devId];
+          return copy;
+        });
+        toast?.success('Removed from shortlist');
+      } else {
+        const res = await api.post('/api/shortlists', { freelancerId: devId });
+        if (res.data?._id) {
+          setShortlistMap((prev) => ({ ...prev, [devId]: res.data._id }));
+          toast?.success('Saved to shortlist');
+        }
+      }
+    } catch (err) {
+      toast?.error(err.message || 'Could not update shortlist');
+    }
+  };
 
   useEffect(() => {
     setSearchInput(search);
@@ -351,12 +391,37 @@ export default function FreelancerDirectory() {
                             </div>
                           </div>
 
-                          <Link
-                            to={`/profile/${dev._id}`}
-                            className="px-4 py-2 rounded-xl bg-[#243040] hover:bg-[#2F6FAB] text-white text-xs font-bold transition-colors shrink-0"
-                          >
-                            View profile
-                          </Link>
+                          <div className="flex items-center gap-2 shrink-0">
+                            {user?.role === 'client' && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleShortlist(dev._id)}
+                                  aria-label={shortlistMap[dev._id] ? 'Remove from shortlist' : 'Save to shortlist'}
+                                  className={`p-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                                    shortlistMap[dev._id]
+                                      ? 'border-[#2F6FAB] bg-[#EAF1F7] text-[#2F6FAB]'
+                                      : 'border-[#DDE5ED] text-[#5A6675] hover:border-[#2F6FAB]'
+                                  }`}
+                                >
+                                  <Bookmark className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setInviteTarget(dev)}
+                                  className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-[#EAF1F7] hover:bg-[#DDE5ED] text-[#2F6FAB] text-xs font-bold transition-colors cursor-pointer"
+                                >
+                                  <Send className="w-3 h-3" /> Invite
+                                </button>
+                              </>
+                            )}
+                            <Link
+                              to={`/profile/${dev._id}`}
+                              className="px-4 py-2 rounded-xl bg-[#243040] hover:bg-[#2F6FAB] text-white text-xs font-bold transition-colors shrink-0"
+                            >
+                              View profile
+                            </Link>
+                          </div>
                         </div>
                       </article>
                     );
@@ -391,6 +456,14 @@ export default function FreelancerDirectory() {
           </section>
         </div>
       </main>
+
+      <InviteToProjectDialog
+        isOpen={Boolean(inviteTarget)}
+        onClose={() => setInviteTarget(null)}
+        freelancer={inviteTarget}
+        clientId={user?._id}
+        onInvited={(res) => toast?.success(res?.duplicate ? 'Already invited to this project' : 'Invitation sent!')}
+      />
     </div>
   );
 }

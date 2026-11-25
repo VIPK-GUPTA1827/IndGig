@@ -4,6 +4,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import FreelancerDirectory from '../pages/FreelancerDirectory';
 import { AuthProvider } from '../context/AuthContext';
+import { ToastProvider } from '../context/ToastContext';
 import api from '../utils/api';
 
 vi.mock('../utils/api', () => ({
@@ -46,9 +47,11 @@ describe('FreelancerDirectory Page', () => {
     render(
       <MemoryRouter initialEntries={['/freelancers']}>
         <AuthProvider>
-          <Routes>
-            <Route path="/freelancers" element={<FreelancerDirectory />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/freelancers" element={<FreelancerDirectory />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>
     );
@@ -70,9 +73,11 @@ describe('FreelancerDirectory Page', () => {
     render(
       <MemoryRouter initialEntries={['/freelancers?search=rust']}>
         <AuthProvider>
-          <Routes>
-            <Route path="/freelancers" element={<FreelancerDirectory />} />
-          </Routes>
+          <ToastProvider>
+            <Routes>
+              <Route path="/freelancers" element={<FreelancerDirectory />} />
+            </Routes>
+          </ToastProvider>
         </AuthProvider>
       </MemoryRouter>
     );

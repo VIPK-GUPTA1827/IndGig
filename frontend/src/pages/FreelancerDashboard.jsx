@@ -55,6 +55,7 @@ export default function FreelancerDashboard() {
   const [gigs, setGigs] = useState([]);
   const [proposals, setProposals] = useState([]);
   const [contracts, setContracts] = useState([]);
+  const [invites, setInvites] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   // Modal states
@@ -172,6 +173,16 @@ export default function FreelancerDashboard() {
         }
       } catch (cErr) {
         console.error('Error fetching contracts:', cErr);
+      }
+
+      // Fetch Project Invitations
+      try {
+        const invData = await api.get('/api/invites');
+        if (invData.success) {
+          setInvites(invData.data || []);
+        }
+      } catch (iErr) {
+        console.warn('Error fetching invites:', iErr);
       }
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -1336,6 +1347,18 @@ export default function FreelancerDashboard() {
                   <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-[#2F6FAB] rounded-full" />
                 )}
               </button>
+
+              <button
+                onClick={() => setActiveTab('invites')}
+                className={`text-sm font-bold pb-1 ml-4 cursor-pointer transition-colors relative ${
+                  activeTab === 'invites' ? 'text-[#030B3D]' : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <span>Invitations ({invites.filter((i) => i.status === 'pending').length})</span>
+                {activeTab === 'invites' && (
+                  <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-[#2F6FAB] rounded-full" />
+                )}
+              </button>
             </div>
 
             {/* Tab 1: Proposals List */}
@@ -1391,6 +1414,76 @@ export default function FreelancerDashboard() {
                   <p className="text-xs text-slate-500 font-medium">
                     You haven't sent any proposals yet. Pick a project above to send your first one.
                   </p>
+                </div>
+              )
+            )}
+
+            {/* Tab: Project Invitations */}
+            {activeTab === 'invites' && (
+              invites.length > 0 ? (
+                <div className="space-y-3">
+                  {invites.map((inv) => (
+                    <div key={inv._id} className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-900">
+                            {inv.project?.title || 'Project Invitation'}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
+                            inv.status === 'pending' ? 'bg-amber-100 text-amber-800'
+                              : inv.status === 'accepted' ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {inv.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          From {inv.client?.companyName || inv.client?.name || 'Client'}
+                          {inv.project?.budget ? ` · Budget ₹${Number(inv.project.budget).toLocaleString('en-IN')}` : ''}
+                        </p>
+                        {inv.message && <p className="text-xs text-slate-700 mt-1">{inv.message}</p>}
+                      </div>
+
+                      {inv.status === 'pending' && inv.project?._id && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await api.patch(`/api/invites/${inv._id}`, { status: 'declined' });
+                                setInvites((prev) => prev.map((x) => x._id === inv._id ? { ...x, status: 'declined' } : x));
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
+                          >
+                            Decline
+                          </button>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await api.patch(`/api/invites/${inv._id}`, { status: 'accepted' });
+                                setInvites((prev) => prev.map((x) => x._id === inv._id ? { ...x, status: 'accepted' } : x));
+                                navigate(`/gigs/${inv.project._id}`);
+                              } catch (err) {
+                                console.error(err);
+                              }
+                            }}
+                            className="px-3.5 py-1.5 rounded-xl bg-[#2F6FAB] text-white text-xs font-bold hover:bg-[#25598A] cursor-pointer"
+                          >
+                            Accept &amp; Review Project
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-white p-8 rounded-3xl border border-slate-200/90 text-center">
+                  <p className="text-sm font-bold text-slate-800">No project invitations yet</p>
+                  <p className="text-xs text-slate-500 mt-1">When clients invite you from the developer directory, they appear here.</p>
                 </div>
               )
             )}
